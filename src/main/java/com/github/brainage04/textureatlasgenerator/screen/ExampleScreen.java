@@ -1,6 +1,6 @@
-package com.example.screen;
+package com.github.brainage04.textureatlasgenerator.screen;
 
-import com.example.ExampleMod;
+import com.github.brainage04.textureatlasgenerator.TextureAtlasGenerator;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -23,7 +23,7 @@ public class ExampleScreen extends Screen {
 
     @Override
     protected void init() {
-        button = ButtonWidget.builder(Text.literal("Button"), button -> ExampleMod.LOGGER.info("You clicked a button!"))
+        button = ButtonWidget.builder(Text.literal("Button"), button -> TextureAtlasGenerator.LOGGER.info("You clicked a button!"))
                 .dimensions((width - BUTTON_WIDTH) / 2, height * 3 / 4, BUTTON_WIDTH, BUTTON_HEIGHT)
                 .tooltip(Tooltip.of(Text.literal("This is a tooltip.")))
                 .build();

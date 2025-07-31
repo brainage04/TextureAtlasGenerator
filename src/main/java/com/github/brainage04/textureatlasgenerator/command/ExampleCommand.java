@@ -1,4 +1,4 @@
-package com.example.command;
+package com.github.brainage04.textureatlasgenerator.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;

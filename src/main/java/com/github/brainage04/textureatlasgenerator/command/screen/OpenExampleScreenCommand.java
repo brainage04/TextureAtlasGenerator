@@ -1,6 +1,6 @@
-package com.example.command.screen;
+package com.github.brainage04.textureatlasgenerator.command.screen;
 
-import com.example.screen.ExampleScreen;
+import com.github.brainage04.textureatlasgenerator.screen.ExampleScreen;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;

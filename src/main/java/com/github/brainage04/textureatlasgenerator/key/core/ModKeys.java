@@ -1,6 +1,6 @@
-package com.example.key.core;
+package com.github.brainage04.textureatlasgenerator.key.core;
 
-import com.example.ExampleMod;
+import com.github.brainage04.textureatlasgenerator.TextureAtlasGenerator;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
@@ -9,10 +9,10 @@ import org.lwjgl.glfw.GLFW;
 
 public class ModKeys {
     public static final KeyBinding testKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "key.%s.testKey".formatted(ExampleMod.MOD_ID),
+            "key.%s.testKey".formatted(TextureAtlasGenerator.MOD_ID),
             InputUtil.Type.KEYSYM,
             GLFW.GLFW_KEY_R,
-            "key.category.%s".formatted(ExampleMod.MOD_ID)
+            "key.category.%s".formatted(TextureAtlasGenerator.MOD_ID)
     ));
 
     public static void initialize() {
