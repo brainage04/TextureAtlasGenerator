@@ -1,4 +1,4 @@
-package com.example.datagen;
+package com.github.brainage04.textureatlasgenerator.datagen;
 
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;

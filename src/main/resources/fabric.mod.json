@@ -1,32 +1,32 @@
 {
 	"schemaVersion": 1,
-	"id": "examplemod",
+	"id": "textureatlasgenerator",
 	"version": "${version}",
-	"name": "ExampleMod",
+	"name": "TextureAtlasGenerator",
 	"description": "brainage04's mod template for client-side Fabric mods.",
 	"authors": [
 		"brainage04"
 	],
 	"contact": {
-		"homepage": "https://github.com/brainage04/ExampleMod",
-		"sources": "https://github.com/brainage04/ExampleMod"
+		"homepage": "https://github.com/brainage04/TextureAtlasGenerator",
+		"sources": "https://github.com/brainage04/TextureAtlasGenerator"
 	},
 	"license": "MIT",
-	"icon": "assets/examplemod/icon.png",
+	"icon": "assets/textureatlasgenerator/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"client": [
-			"com.example.ExampleMod"
+			"com.github.brainage04.textureatlasgenerator.TextureAtlasGenerator"
 		],
 		"fabric-datagen": [
-			"com.example.datagen.DataGenerator"
+			"com.github.brainage04.textureatlasgenerator.datagen.DataGenerator"
 		],
 		"modmenu": [
-			"com.example.modmenu.ModMenuIntegration"
+			"com.github.brainage04.textureatlasgenerator.modmenu.ModMenuIntegration"
 		]
 	},
 	"mixins": [
-		"examplemod.mixins.json"
+		"textureatlasgenerator.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.14",
@@ -34,5 +34,5 @@
 		"java": ">=21",
 		"fabric-api": "*"
 	},
-	"accessWidener": "examplemod.accesswidener"
+	"accessWidener": "textureatlasgenerator.accesswidener"
 }

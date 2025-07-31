@@ -83,7 +83,7 @@ publishing {
 	repositories {
 		maven {
 			name = "GitHubPackages"
-			url = "https://maven.pkg.github.com/brainage04/ExampleMod"
+			url = "https://maven.pkg.github.com/brainage04/TextureAtlasGenerator"
 			credentials {
 				username = System.getenv("GITHUB_USERNAME")
 				password = System.getenv("GITHUB_TOKEN")
@@ -93,5 +93,5 @@ publishing {
 }
 
 loom {
-	accessWidenerPath = file("src/main/resources/examplemod.accesswidener")
+	accessWidenerPath = file("src/main/resources/textureatlasgenerator.accesswidener")
 }
