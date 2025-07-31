@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "examplemod",
+	"version": "${version}",
+	"name": "ExampleMod",
+	"description": "brainage04's mod template for client-side Fabric mods.",
+	"authors": [
+		"brainage04"
+	],
+	"contact": {
+		"homepage": "https://github.com/brainage04/ExampleMod",
+		"sources": "https://github.com/brainage04/ExampleMod"
+	},
+	"license": "MIT",
+	"icon": "assets/examplemod/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			"com.example.ExampleMod"
+		],
+		"fabric-datagen": [
+			"com.example.datagen.DataGenerator"
+		],
+		"modmenu": [
+			"com.example.modmenu.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"examplemod.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.21.8",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"accessWidener": "examplemod.accesswidener"
+}
