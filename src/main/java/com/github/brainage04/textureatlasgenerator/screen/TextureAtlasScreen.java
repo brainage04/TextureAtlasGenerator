@@ -3,20 +3,23 @@ package com.github.brainage04.textureatlasgenerator.screen;
 import com.github.brainage04.textureatlasgenerator.TextureAtlasGenerator;
 import com.github.brainage04.textureatlasgenerator.screen.core.FloatSliderWidget;
 import com.github.brainage04.textureatlasgenerator.util.ChatUtils;
-import net.minecraft.client.gl.SimpleFramebuffer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TextureAtlasScreen extends Screen {
     private static List<ItemStack> vanillaItems;
@@ -38,18 +41,46 @@ public class TextureAtlasScreen extends Screen {
         this.parent = parent;
     }
 
-    private static void exportTextureAtlas(DrawContext context) {
-        String atlasName = "texture_atlas_vanilla";
+    public static NativeImage subtract(NativeImage imageA, NativeImage imageB) {
+        int width  = imageA.getWidth();
+        int height = imageA.getHeight();
 
+        if (width != imageB.getWidth() || height != imageB.getHeight()) {
+            throw new IllegalArgumentException("Images must be the same size");
+        }
+
+        NativeImage out = new NativeImage(width, height, true);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pxA = imageA.getColorArgb(x, y);
+                int pxB = imageB.getColorArgb(x, y);
+
+                int a = (pxA >> 24) & 0xFF;
+                int r = clamp(((pxA >> 16) & 0xFF) - ((pxB >> 16) & 0xFF));
+                int g = clamp(((pxA >> 8)  & 0xFF) - ((pxB >> 8)  & 0xFF));
+                int b = clamp((pxA & 0xFF) - (pxB & 0xFF));
+
+                out.setColorArgb(x, y, (a << 24) | (r << 16) | (g << 8) | b);
+            }
+        }
+
+        return out;
+    }
+
+    private static int clamp(int value) {
+        return value < 0 ? 0 : Math.min(value, 255);
+    }
+
+    private static void renderTextureAtlas(DrawContext context) {
         int pixelsPerItem = Math.round((SIZE + PADDING) * scale);
         int width = rowsColumns * pixelsPerItem;
         int height = rowsColumns * pixelsPerItem;
 
         TextureAtlasGenerator.LOGGER.info("Row/column count: {}, Dimensions per item: {}x{}, Dimensions: {}x{}, Total pixels: {}", rowsColumns, pixelsPerItem, pixelsPerItem, width, height, width * height);
 
-        SimpleFramebuffer framebuffer = new SimpleFramebuffer(atlasName, width, height, true);
-        // todo: set framebuffer background to transparent (0,0,0,0 in RGBA format)
-        // todo: start writing to framebuffer
+        AtomicReference<NativeImage> before = new AtomicReference<>();
+        ScreenshotRecorder.takeScreenshot(MinecraftClient.getInstance().getFramebuffer(), before::set);
 
         int x = 0, y = 0;
         for (ItemStack stack : vanillaItems) {
@@ -62,12 +93,11 @@ public class TextureAtlasScreen extends Screen {
             }
         }
 
-        // todo: stop writing to framebuffer
-
-        ScreenshotRecorder.takeScreenshot(framebuffer, nativeImage -> {
+        ScreenshotRecorder.takeScreenshot(MinecraftClient.getInstance().getFramebuffer(), nativeImage -> {
             try (nativeImage) {
-                File output = new File(String.format("%s.png", atlasName));
-                nativeImage.writeTo(output);
+                NativeImage result = subtract(nativeImage, before.get());
+                File output = new File("texture_atlas_vanilla.png");
+                result.writeTo(output);
                 ChatUtils.addAtlasComponent(output, "texture atlas");
             } catch (IOException e) {
                 TextureAtlasGenerator.LOGGER.error(
@@ -108,14 +138,17 @@ public class TextureAtlasScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         super.render(context, mouseX, mouseY, deltaTicks);
 
+        context.drawItem(Items.CRAFTING_TABLE.getDefaultStack(), 0, 0);
+
         if (shouldExport) {
-            exportTextureAtlas(context);
+            renderTextureAtlas(context);
             shouldExport = false;
         }
     }
 
     @Override
     public void close() {
+        // todo: suppress?
         client.setScreen(parent);
     }
 }
