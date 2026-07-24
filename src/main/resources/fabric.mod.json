@@ -1,38 +1,27 @@
 {
 	"schemaVersion": 1,
-	"id": "textureatlasgenerator",
-	"version": "${version}",
-	"name": "TextureAtlasGenerator",
-	"description": "brainage04's mod template for client-side Fabric mods.",
-	"authors": [
-		"brainage04"
-	],
+	"id": "${mod_id}",
+	"version": "${mod_version}",
+	"name": "${mod_name}",
+	"description": "Generate vanilla and Hypixel SkyBlock texture atlases.",
+	"authors": ["brainage04"],
 	"contact": {
 		"homepage": "https://github.com/brainage04/TextureAtlasGenerator",
 		"sources": "https://github.com/brainage04/TextureAtlasGenerator"
 	},
 	"license": "MIT",
 	"icon": "assets/textureatlasgenerator/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"client": [
-			"com.github.brainage04.textureatlasgenerator.TextureAtlasGenerator"
-		],
-		"fabric-datagen": [
-			"com.github.brainage04.textureatlasgenerator.datagen.DataGenerator"
-		],
-		"modmenu": [
-			"com.github.brainage04.textureatlasgenerator.modmenu.ModMenuIntegration"
-		]
+		"client": ["io.github.brainage04.textureatlasgenerator.TextureAtlasGenerator"],
+		"modmenu": ["io.github.brainage04.textureatlasgenerator.modmenu.ModMenuIntegration"]
 	},
-	"mixins": [
-		"textureatlasgenerator.mixins.json"
-	],
 	"depends": {
-		"fabricloader": ">=0.16.14",
-		"minecraft": "~1.21.8",
-		"java": ">=21",
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=${java_version}",
 		"fabric-api": "*"
 	},
+	"suggests": {"modmenu": "*"},
 	"accessWidener": "textureatlasgenerator.accesswidener"
 }
