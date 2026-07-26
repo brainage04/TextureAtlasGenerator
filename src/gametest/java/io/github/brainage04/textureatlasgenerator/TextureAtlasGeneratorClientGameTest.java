@@ -136,6 +136,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
     }
 
     private static void openScreen(ClientGameTestContext context, AtlasKind kind) {
+        context.waitTicks(1);
         context.runOnClient(client -> {
             TextureAtlasScreen screen = new TextureAtlasScreen(client.gui.screen());
             screen.setSelection(kind, PIXEL_SIZE);
@@ -144,6 +145,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
     }
 
     private static void openExportScreen(ClientGameTestContext context, AtlasKind kind) {
+        context.waitTicks(1);
         context.runOnClient(client -> {
             TextureAtlasScreen screen = new TextureAtlasScreen(client.gui.screen());
             screen.setSelection(kind, PIXEL_SIZE);

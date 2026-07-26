@@ -179,7 +179,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        extractBackground(graphics, mouseX, mouseY, delta);
+        extractTransparentBackground(graphics);
         super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         graphics.centeredText(font, title, width / 2, 14, 0xFFFFFFFF);
