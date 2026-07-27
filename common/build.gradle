@@ -1,0 +1,25 @@
+plugins {
+	id 'dev.architectury.loom-no-remap'
+	id 'dev.architectury.loom'
+}
+
+sourceSets {
+	main {
+		java.srcDir rootProject.file('src/main/java')
+		java.exclude 'io/github/brainage04/textureatlasgenerator/command/**'
+		java.exclude 'io/github/brainage04/textureatlasgenerator/key/**'
+		java.exclude 'io/github/brainage04/textureatlasgenerator/modmenu/**'
+		java.exclude 'io/github/brainage04/textureatlasgenerator/fabric/**'
+		resources.srcDir rootProject.file('src/main/resources')
+		resources.exclude 'fabric.mod.json'
+	}
+}
+
+loom {
+	accessWidenerPath = rootProject.file('src/main/resources/textureatlasgenerator.accesswidener')
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+	compileOnly "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+}

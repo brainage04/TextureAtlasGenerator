@@ -1,0 +1,74 @@
+plugins {
+	id 'io.github.brainage04.fabric-mod-conventions' version "${fabricmoddingconventions_version}"
+	id 'io.github.brainage04.client-gametest-recorder' version "${fabricmoddingconventions_version}"
+	id 'io.github.brainage04.production-gametests' version "${fabricmoddingconventions_version}"
+	id 'io.github.brainage04.workspace-dependencies' version "${fabricmoddingconventions_version}"
+	id 'io.github.brainage04.mod-publishing' version "${fabricmoddingconventions_version}"
+}
+
+base { archivesName = rootProject.archives_base_name }
+
+sourceSets {
+	main {
+		java.srcDir rootProject.file('src/main/java')
+		java.include 'io/github/brainage04/textureatlasgenerator/fabric/**'
+		java.include 'io/github/brainage04/textureatlasgenerator/command/**'
+		java.include 'io/github/brainage04/textureatlasgenerator/key/**'
+		java.include 'io/github/brainage04/textureatlasgenerator/modmenu/**'
+		resources.srcDir rootProject.file('src/main/resources')
+	}
+	gametest {
+		java.srcDir rootProject.file('src/gametest/java')
+		resources.srcDir rootProject.file('src/gametest/resources')
+	}
+}
+
+loom {
+	accessWidenerPath = rootProject.file('src/main/resources/textureatlasgenerator.accesswidener')
+	mods {
+		main {
+			sourceSet sourceSets.main
+			sourceSet project(':common').sourceSets.main
+		}
+	}
+	runs { client { runDir 'run/client' } }
+}
+
+repositories {
+	maven { url = 'https://api.modrinth.com/maven/' }
+}
+
+configurations {
+	common { canBeResolved = true; canBeConsumed = false }
+	compileClasspath.extendsFrom common
+	runtimeClasspath.extendsFrom common
+	developmentFabric.extendsFrom common
+}
+
+workspaceDependencies {
+	siblingMaven('FabricModdingConventions') {
+		coordinate.set("io.github.brainage04:fabricmoddingconventions:${project.fabricmoddingconventions_version}")
+		siblingDirectory.set(rootProject.layout.projectDirectory.dir('../FabricModdingConventions'))
+	}
+}
+
+modPublishing {
+	github.repository.set('brainage04/TextureAtlasGenerator')
+	licenseFile.set(rootProject.layout.projectDirectory.file('LICENSE'))
+	modrinth.projectConfig.set(rootProject.layout.projectDirectory.file('.modrinth/project.json'))
+	modrinth.projectBody.set(rootProject.layout.projectDirectory.file('README.md'))
+	modrinth.iconFile.set(rootProject.layout.projectDirectory.file('src/main/resources/assets/textureatlasgenerator/icon.png'))
+}
+
+productionGameTests { includeServer = false }
+
+dependencies {
+	common(project(':common')) { transitive = false }
+	implementation "io.github.brainage04:fabricmoddingconventions:${project.fabricmoddingconventions_version}"
+	implementation "maven.modrinth:modmenu:${project.modmenu_version}"
+	productionRuntimeMods "maven.modrinth:modmenu:${project.modmenu_version}"
+}
+
+tasks.named('jar') { from project(':common').sourceSets.main.output; duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+tasks.named('sourcesJar') { from project(':common').sourceSets.main.allSource; duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+tasks.matching { it.name.startsWith('run') }.configureEach { dependsOn project(':common').tasks.named('jar') }

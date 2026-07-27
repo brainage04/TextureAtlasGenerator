@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="textureatlasgenerator"
+version="${version}"
+displayName="Texture Atlas Generator"
+description='''Generate vanilla and Hypixel SkyBlock texture atlases.'''
+authors="brainage04"
+displayURL="https://github.com/brainage04/TextureAtlasGenerator"
+logoFile="assets/textureatlasgenerator/icon.png"
+
+[[dependencies.textureatlasgenerator]]
+modId="neoforge"
+type="required"
+versionRange="[${neoforge_version},)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.textureatlasgenerator]]
+modId="minecraft"
+type="required"
+versionRange="[${minecraft_version},)"
+ordering="NONE"
+side="CLIENT"

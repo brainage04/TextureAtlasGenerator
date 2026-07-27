@@ -13,7 +13,7 @@
 	"icon": "assets/textureatlasgenerator/icon.png",
 	"environment": "client",
 	"entrypoints": {
-		"client": ["io.github.brainage04.textureatlasgenerator.TextureAtlasGenerator"],
+		"client": ["io.github.brainage04.textureatlasgenerator.fabric.TextureAtlasGeneratorFabric"],
 		"modmenu": ["io.github.brainage04.textureatlasgenerator.modmenu.ModMenuIntegration"]
 	},
 	"depends": {
