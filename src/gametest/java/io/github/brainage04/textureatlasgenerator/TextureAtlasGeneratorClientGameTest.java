@@ -12,7 +12,7 @@ import io.github.brainage04.textureatlasgenerator.atlas.SkyBlockData;
 import io.github.brainage04.textureatlasgenerator.screen.TextureAtlasScreen;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
+
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -28,15 +28,12 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
     @Override
     public void runTest(ClientGameTestContext context) {
         Properties serverProperties = ClientGameTestServers.flatServerProperties();
-        try (TestDedicatedServerContext server = context.worldBuilder().createServer(serverProperties)) {
-            ClientGameTestServers.connectToDedicatedServer(context, server, "Texture Atlas Generator GameTest");
-            try {
-                runConnectedTest(context);
-            } finally {
-                cleanupOutputs(context);
-                ClientGameTestServers.disconnectFromDedicatedServer(context);
-            }
-        }
+        ClientGameTestServers.withDedicatedServer(context, serverProperties, "Texture Atlas Generator GameTest", server -> { try {
+            runConnectedTest(context);
+        } finally {
+            cleanupOutputs(context);
+            ;
+        } });
     }
 
     private void runConnectedTest(ClientGameTestContext context) {

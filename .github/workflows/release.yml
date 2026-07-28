@@ -9,56 +9,15 @@ permissions:
   contents: read
 
 jobs:
-  prepare:
+  distribution:
     permissions:
       contents: write
-    uses: brainage04/FabricModdingConventions/.github/workflows/reusable-release-prepare.yml@v2.3.9
+    uses: brainage04/FabricModdingConventions/.github/workflows/reusable-multiloader-release.yml@v2.4.0
     with:
       additional_artifact_pattern: textureatlasgenerator-neoforge-*.jar
-      resolve_release_notes_with_gradle: false
-    secrets:
-      release_token: ${{ secrets.GITHUB_TOKEN }}
-
-  github:
-    needs: prepare
-    permissions:
-      contents: write
-    uses: brainage04/FabricModdingConventions/.github/workflows/reusable-publish-github.yml@v2.3.9
-    with:
-      artifact_file: ${{ needs.prepare.outputs.artifact_file }}
-      additional_artifact_file: ${{ needs.prepare.outputs.additional_artifact_file }}
-      publish_with_gradle: false
-      release_body: ${{ needs.prepare.outputs.release_body }}
       release_name: ${{ format('TextureAtlasGenerator {0}', github.ref_name) }}
+      modrinth_project_id: ${{ vars.MODRINTH_PROJECT_ID }}
+      publish_curseforge: false
     secrets:
       release_token: ${{ secrets.GITHUB_TOKEN }}
-
-  modrinth-fabric:
-    needs: prepare
-    permissions:
-      contents: read
-    uses: brainage04/FabricModdingConventions/.github/workflows/reusable-publish-modrinth.yml@v2.3.9
-    with:
-      artifact_file: ${{ needs.prepare.outputs.artifact_file }}
-      gradle_task: :fabric:publishModrinth
-      sync_gradle_task: :fabric:syncModrinthIcon
-      sync_state_file: fabric/build/mod-publishing/modrinth-project-state.json
-      release_body: ${{ needs.prepare.outputs.release_body }}
-    secrets:
-      modrinth_token: ${{ secrets.MODRINTH_TOKEN }}
-
-  modrinth-neoforge:
-    needs:
-      - prepare
-      - modrinth-fabric
-    permissions:
-      contents: read
-    uses: brainage04/FabricModdingConventions/.github/workflows/reusable-publish-modrinth.yml@v2.3.9
-    with:
-      artifact_file: ${{ needs.prepare.outputs.additional_artifact_file }}
-      gradle_task: :neoforge:publishModrinth
-      sync_project: false
-      release_body: ${{ needs.prepare.outputs.release_body }}
-      project_id: ${{ needs.modrinth-fabric.outputs.project_id }}
-    secrets:
       modrinth_token: ${{ secrets.MODRINTH_TOKEN }}
