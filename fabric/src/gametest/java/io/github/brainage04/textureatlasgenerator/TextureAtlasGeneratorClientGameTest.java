@@ -182,15 +182,21 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
                         "PNG dimensions do not match export result: " + image.getWidth() + 'x' + image.getHeight()
                 );
             }
-            boolean hasVisiblePixel = false;
-            for (int pixel : image.getPixels()) {
-                if ((pixel >>> 24) != 0) {
-                    hasVisiblePixel = true;
-                    break;
+            for (int index = 0; index < result.itemCount(); index++) {
+                int left = index % AtlasExporter.COLUMNS * expectedPixelSize;
+                int top = index / AtlasExporter.COLUMNS * expectedPixelSize;
+                boolean visible = false;
+                for (int y = top; y < top + expectedPixelSize && !visible; y++) {
+                    for (int x = left; x < left + expectedPixelSize; x++) {
+                        if ((image.getPixel(x, y) >>> 24) != 0) {
+                            visible = true;
+                            break;
+                        }
+                    }
                 }
-            }
-            if (!hasVisiblePixel) {
-                throw new AssertionError("Rendered atlas is fully transparent");
+                if (!visible) {
+                    throw new AssertionError("Atlas cell " + index + " is transparent at " + left + ", " + top);
+                }
             }
         } catch (Exception error) {
             throw new AssertionError("Unable to validate the rendered PNG", error);

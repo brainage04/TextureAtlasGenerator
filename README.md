@@ -7,7 +7,7 @@ A client-side Fabric and NeoForge mod for Minecraft 26.2 that exports item-model
 - Exports every registered vanilla item model.
 - Exports all 2,545 legacy Hypixel SkyBlock player-head textures.
 - Exports the 351-item Hypixel SkyBlock Bazaar subset.
-- Supports item sizes from 8×8 through 128×128 pixels.
+- Supports item sizes from 8×8 through 256×256 pixels, independent of GUI scale and window size.
 - Includes a searchable in-game preview and progress display.
 - Writes a JSON coordinate mapping beside every PNG.
 - Splits GPU rendering into bounded pages, so large atlases are assembled without exceeding the render-target limit.
@@ -35,7 +35,7 @@ The legacy SkyBlock command remains available:
 /skyblockatlas <pixels> <fullAtlas>
 ```
 
-`fullAtlas=true` selects all SkyBlock entries; `false` selects the Bazaar subset. Pixel sizes must be between 8 and 128.
+`fullAtlas=true` selects all SkyBlock entries; `false` selects the Bazaar subset. Pixel sizes must be between 8 and 256.
 
 Outputs are written under the Minecraft instance:
 
@@ -45,6 +45,8 @@ texture-atlases/<atlas>_<pixel-size>x<pixel-size>.json
 ```
 
 The JSON file records the item name, index, row, column, and pixel rectangle for every entry. Atlas ordering is deterministic. SkyBlock exports download the embedded player-head textures first; individual download failures are reported and rendered with Minecraft's fallback skin rather than aborting the entire atlas.
+
+Exports use the first frame of animated textures and a fixed shader/glint time. Clock and compass models use their ownerless GUI state. This makes repeated exports byte-identical for the same resources and size, rather than capturing the current player's position or animation tick. The client's animation state is restored after each page. GPU pages are at most 4096×4096; the assembled PNG can be larger.
 
 ## Requirements
 

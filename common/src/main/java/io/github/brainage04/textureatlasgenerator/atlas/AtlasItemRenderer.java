@@ -82,16 +82,26 @@ final class AtlasItemRenderer {
     ) {
         GuiRenderState renderState = new GuiRenderState();
         GuiRenderer renderer = new GuiRenderer(renderState, client.gameRenderer.featureRenderDispatcher(), List.of());
-        GuiGraphicsExtractor graphics = new GuiGraphicsExtractor(client, renderState, 0, 0);
-
         int renderScale = Math.max(1, Math.ceilDiv(pixelSize, 16));
+        // The extractor's initial scissor comes from these methods, not WindowRenderState.
+        GuiGraphicsExtractor graphics = new GuiGraphicsExtractor(client, renderState, 0, 0) {
+            @Override
+            public int guiWidth() {
+                return Math.ceilDiv(target.width, renderScale);
+            }
+
+            @Override
+            public int guiHeight() {
+                return Math.ceilDiv(target.height, renderScale);
+            }
+        };
         float itemScale = pixelSize / (16.0F * renderScale);
         graphics.pose().pushMatrix();
         graphics.pose().scale(itemScale, itemScale);
         for (int offset = 0; offset < itemCount; offset++) {
             int row = offset / columns;
             int column = offset % columns;
-            graphics.item(entries.get(fromIndex + offset).stack(), column * 16, row * 16);
+            graphics.fakeItem(entries.get(fromIndex + offset).stack(), column * 16, row * 16);
         }
         graphics.pose().popMatrix();
 
@@ -100,11 +110,12 @@ final class AtlasItemRenderer {
         int previousWidth = window.width;
         int previousHeight = window.height;
         int previousGuiScale = window.guiScale;
-        try {
+        try (AtlasRenderContext context = new AtlasRenderContext(client)) {
             client.gameRenderer.mainRenderTarget = target;
             window.width = target.width;
             window.height = target.height;
             window.guiScale = renderScale;
+            context.apply(target.width, target.height);
             renderer.render();
         } finally {
             client.gameRenderer.mainRenderTarget = previousTarget;

@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class AtlasExporter {
     public static final int MIN_PIXEL_SIZE = 8;
-    public static final int MAX_PIXEL_SIZE = 128;
+    public static final int MAX_PIXEL_SIZE = 256;
     public static final int DEFAULT_PIXEL_SIZE = 64;
     public static final int COLUMNS = 32;
 
@@ -39,7 +39,7 @@ public final class AtlasExporter {
     private final NativeImage atlas;
     private final int atlasWidth;
     private final int atlasHeight;
-    private final int rowsPerPage;
+    private final int columnsPerPage;
     private final int itemsPerPage;
 
     private int nextSkinIndex;
@@ -59,8 +59,9 @@ public final class AtlasExporter {
         int rows = Math.ceilDiv(entries.size(), COLUMNS);
         this.atlasWidth = COLUMNS * pixelSize;
         this.atlasHeight = rows * pixelSize;
-        this.rowsPerPage = Math.max(1, MAX_PAGE_SIZE / pixelSize);
-        this.itemsPerPage = COLUMNS * rowsPerPage;
+        // A power-of-two page width divides the 32-column atlas, even for non-power-of-two pixel sizes.
+        this.columnsPerPage = Math.min(COLUMNS, Integer.highestOneBit(MAX_PAGE_SIZE / pixelSize));
+        this.itemsPerPage = columnsPerPage * (MAX_PAGE_SIZE / pixelSize);
         this.atlas = new NativeImage(atlasWidth, atlasHeight, true);
     }
 
@@ -153,7 +154,7 @@ public final class AtlasExporter {
 
         int pageStart = nextRenderIndex;
         int pageItems = Math.min(itemsPerPage, entries.size() - pageStart);
-        int pageRows = Math.ceilDiv(pageItems, COLUMNS);
+        int pageRows = Math.ceilDiv(pageItems, columnsPerPage);
         int pageHeight = pageRows * pixelSize;
         listener.onProgress(new Progress(
                 Stage.RENDERING,
@@ -167,8 +168,8 @@ public final class AtlasExporter {
                 pageStart,
                 pageItems,
                 pixelSize,
-                COLUMNS,
-                atlasWidth,
+                columnsPerPage,
+                columnsPerPage * pixelSize,
                 pageHeight,
                 (page, error) -> {
                     if (error != null) {
@@ -189,18 +190,24 @@ public final class AtlasExporter {
     }
 
     private void copyPage(NativeImage page, int pageStart, int pageItems) {
-        int destinationRow = pageStart / COLUMNS;
-        int pageRows = Math.ceilDiv(pageItems, COLUMNS);
-        int bytesPerRow = atlasWidth * 4;
+        int sourceStride = page.getWidth() * 4;
+        int destinationStride = atlasWidth * 4;
         ByteBuffer source = page.getPixelBytes();
         ByteBuffer destination = atlas.getPixelBytes();
-        for (int row = 0; row < pageRows; row++) {
-            destination.put(
-                    (destinationRow + row) * bytesPerRow,
-                    source,
-                    row * bytesPerRow,
-                    bytesPerRow
-            );
+        for (int firstItem = 0; firstItem < pageItems; firstItem += columnsPerPage) {
+            int destinationItem = pageStart + firstItem;
+            int destinationX = destinationItem % COLUMNS * pixelSize * 4;
+            int destinationY = destinationItem / COLUMNS * pixelSize;
+            int sourceY = firstItem / columnsPerPage * pixelSize;
+            int bytes = Math.min(columnsPerPage, pageItems - firstItem) * pixelSize * 4;
+            for (int y = 0; y < pixelSize; y++) {
+                destination.put(
+                        (destinationY + y) * destinationStride + destinationX,
+                        source,
+                        (sourceY + y) * sourceStride,
+                        bytes
+                );
+            }
         }
     }
 
