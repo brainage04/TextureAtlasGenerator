@@ -35,6 +35,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     private Component status = Component.literal("Choose an atlas and export size.");
     private boolean statusIsError;
     private boolean exportOnOpen;
+    private boolean controlsExporting;
 
     private CycleButton<AtlasKind> atlasButton;
     private Button decreaseSizeButton;
@@ -168,6 +169,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
 
     private void updateControls() {
         boolean exporting = AtlasExporter.isExporting();
+        controlsExporting = exporting;
         if (atlasButton != null) {
             atlasButton.active = !exporting;
             decreaseSizeButton.active = !exporting && pixelSize > AtlasExporter.MIN_PIXEL_SIZE;
@@ -176,6 +178,14 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
             searchBox.setEditable(!exporting);
         }
     }
+    @Override
+    public void tick() {
+        super.tick();
+        if (controlsExporting != AtlasExporter.isExporting()) {
+            updateControls();
+        }
+    }
+
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
