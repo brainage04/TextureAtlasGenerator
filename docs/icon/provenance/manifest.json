@@ -1,0 +1,52 @@
+{
+  "entries": [
+    {
+      "project": "TextureAtlasGenerator",
+      "label": "Modern textures — same 16 blocks and order as DevUtils",
+      "path": "atlas4/textureatlasgenerator-same-devutils-1024.png",
+      "method": "Unmasked 1:1 paste of native 256x256 RGBA cells from the fixed TextureAtlasGenerator export. No resizing, recoloring, compositing mask, or resampling; 1024x1024, 4x4 grid.",
+      "source": "atlas4/raw-export/vanilla_items_256x256.png",
+      "notes": "Uses the actual atlas3/devutils/icon-proof.json order, not the erroneous STONE/GRANITE/... list in the initial assignment. The parent confirmed that correction. Order: GRASS_BLOCK, DIRT, STONE, COBBLESTONE, OAK_WOOD_PLANKS, OAK_WOOD, OAK_LEAVES, GLASS, SAND, GRAVEL, BRICKS, BOOKSHELF, CRAFTING_TABLE, FURNACE, CHEST, OBSIDIAN. OAK_WOOD (legacy LOG) maps to minecraft:oak_log, not minecraft:oak_wood. All identities have modern equivalents. All 16 saved icon cells and separately saved cells are byte-identical to their source export rectangles; see atlas4/icon-proof.json. Icon SHA256 07d54e88ff01ebf37e0a15da57e811de26c00aa87341fdcef2607fc3b5b6e838."
+    },
+    {
+      "project": "TextureAtlasGenerator",
+      "label": "Raw fixed native 256px export used by matching-block icon",
+      "path": "atlas4/raw-export/vanilla_items_256x256.png",
+      "method": "Unmodified file copy of the surviving examples export, hash-verified against the recorded fixed/config-0 export; JSON copied directly from fixed/config-0.",
+      "source": "atlas3/textureatlasgenerator/examples/vanilla_items_256x256.png",
+      "notes": "The original fixed/config-0 PNG is no longer present, but this archived raw copy is identical to its recorded SHA256 c9baa75bac9a498b4d3a5be106ca75163e4d3e33aaa599618f7aba4485cdd681. 8192x12288, 1536 mapped items, all 16 required cells present. No regeneration needed. Exact provenance in atlas4/source-provenance.json."
+    }
+  ],
+  "verifiedLegacyOrder": [
+    "GRASS_BLOCK", "DIRT", "STONE", "COBBLESTONE",
+    "OAK_WOOD_PLANKS", "OAK_WOOD", "OAK_LEAVES", "GLASS",
+    "SAND", "GRAVEL", "BRICKS", "BOOKSHELF",
+    "CRAFTING_TABLE", "FURNACE", "CHEST", "OBSIDIAN"
+  ],
+  "modernIds": [
+    "minecraft:grass_block", "minecraft:dirt", "minecraft:stone", "minecraft:cobblestone",
+    "minecraft:oak_planks", "minecraft:oak_log", "minecraft:oak_leaves", "minecraft:glass",
+    "minecraft:sand", "minecraft:gravel", "minecraft:bricks", "minecraft:bookshelf",
+    "minecraft:crafting_table", "minecraft:furnace", "minecraft:chest", "minecraft:obsidian"
+  ],
+  "requestOrderDiscrepancy": {
+    "initialAssignmentList": [
+      "STONE", "GRANITE", "DIORITE", "ANDESITE", "GRASS_BLOCK", "DIRT", "COBBLESTONE", "OAK_WOOD_PLANKS",
+      "BEDROCK", "SAND", "RED_SAND", "GRAVEL", "GOLD_ORE", "IRON_ORE", "COAL_ORE", "OAK_WOOD"
+    ],
+    "resolution": "Verified all 16 legacy saved-icon cell hashes against atlas3/devutils/icon-proof.json and used that proof's identities and positions as instructed by Main's correction. The legacy icon itself is unchanged.",
+    "redSand": "RED_SAND maps to minecraft:red_sand, but is not in the verified legacy icon and is therefore intentionally not selected."
+  },
+  "missingModernEquivalents": [],
+  "reproduce": {
+    "command": "PYTHONPATH=/nix/store/4v9j9wbzyhrlx9980ygbr812313mazy0-python3.13-pillow-12.3.0/lib/python3.13/site-packages python3 /home/thomas/01_TM/Coding/Websites/brainage04.github.io/.local-icon-variants/round3/atlas4/compose.py",
+    "inputs": "All input PNGs, metadata, and proof snapshots are preserved inside atlas4. The script reopens the saved icon and each cell PNG and compares decoded RGBA bytes with the raw export."
+  },
+  "reports": {
+    "perCellProof": "atlas4/icon-proof.json",
+    "rawExportProvenance": "atlas4/source-provenance.json",
+    "verification": "atlas4/verification-run.json",
+    "blockers": "atlas4/blockers.json",
+    "cleanup": "atlas4/cleanup-report.json"
+  }
+}

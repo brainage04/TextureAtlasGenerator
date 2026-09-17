@@ -1,0 +1,405 @@
+{
+  "size": [
+    1024,
+    1024
+  ],
+  "grid": [
+    4,
+    4
+  ],
+  "cellSize": [
+    256,
+    256
+  ],
+  "scale": 1,
+  "resampling": "none",
+  "source": "fixed/config-0/vanilla_items_256x256.png",
+  "sourceSha256": "c9baa75bac9a498b4d3a5be106ca75163e4d3e33aaa599618f7aba4485cdd681",
+  "iconSha256": "d0c4f6e5a3776813908da471c7f9788cf448d7bcc07504e592e30852075d716a",
+  "cells": [
+    {
+      "name": "minecraft:stone",
+      "sourceRect": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "iconRect": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "rgbaSha256": "118536fe31dcf60bde6627221ce1f75d0299a793a6654e0a65568e9c23371c54",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 7309
+    },
+    {
+      "name": "minecraft:granite",
+      "sourceRect": [
+        256,
+        0,
+        256,
+        256
+      ],
+      "iconRect": [
+        256,
+        0,
+        256,
+        256
+      ],
+      "rgbaSha256": "ebd2fac90d975a35ad3810e4231a5245d185778873bdc941122e7f061e2c7642",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9242
+    },
+    {
+      "name": "minecraft:diorite",
+      "sourceRect": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "iconRect": [
+        512,
+        0,
+        256,
+        256
+      ],
+      "rgbaSha256": "c29d0e06dd995da40ab45719a5b76a155d063f936827e74c4c5db3ba9d91a488",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9883
+    },
+    {
+      "name": "minecraft:andesite",
+      "sourceRect": [
+        1280,
+        0,
+        256,
+        256
+      ],
+      "iconRect": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "rgbaSha256": "21c5f5649731b20962396164f43ae6cc1542d9a84600d4699b8b391bbf915c8c",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9213
+    },
+    {
+      "name": "minecraft:deepslate",
+      "sourceRect": [
+        1792,
+        0,
+        256,
+        256
+      ],
+      "iconRect": [
+        0,
+        256,
+        256,
+        256
+      ],
+      "rgbaSha256": "405257939ffe0ba583fb448fa97d69d37c1d5044f2a768a432c772f6dd4d14f3",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 8469
+    },
+    {
+      "name": "minecraft:cobbled_deepslate",
+      "sourceRect": [
+        2048,
+        0,
+        256,
+        256
+      ],
+      "iconRect": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "rgbaSha256": "033a1b602a6988ba8ae385197bd31c15471d351c14b6f97911795a05dbeca3d5",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9267
+    },
+    {
+      "name": "minecraft:tuff",
+      "sourceRect": [
+        2816,
+        0,
+        256,
+        256
+      ],
+      "iconRect": [
+        512,
+        256,
+        256,
+        256
+      ],
+      "rgbaSha256": "eaf1c041d9ee5a02344c6962756fd5933c5eb5f501aa0452d6516c27330a34c0",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 8254
+    },
+    {
+      "name": "minecraft:dripstone_block",
+      "sourceRect": [
+        5120,
+        256,
+        256,
+        256
+      ],
+      "iconRect": [
+        768,
+        256,
+        256,
+        256
+      ],
+      "rgbaSha256": "c52e1be8e3edfe0246d83b2fad797abc38b00caaaa7869a49d4b3174e2d2bf91",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 8611
+    },
+    {
+      "name": "minecraft:grass_block",
+      "sourceRect": [
+        5376,
+        256,
+        256,
+        256
+      ],
+      "iconRect": [
+        0,
+        512,
+        256,
+        256
+      ],
+      "rgbaSha256": "ea7f2d13acc72565960dcd650813d1c427563b9206ef9e532d63335ceadfee1f",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 10078
+    },
+    {
+      "name": "minecraft:dirt",
+      "sourceRect": [
+        5632,
+        256,
+        256,
+        256
+      ],
+      "iconRect": [
+        256,
+        512,
+        256,
+        256
+      ],
+      "rgbaSha256": "5ab44c96ab0786bfd1e75329f2225e9218736e490c7edeef2eaf00e33b53c585",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9083
+    },
+    {
+      "name": "minecraft:cobblestone",
+      "sourceRect": [
+        7424,
+        256,
+        256,
+        256
+      ],
+      "iconRect": [
+        512,
+        512,
+        256,
+        256
+      ],
+      "rgbaSha256": "8ad80600c4987babc97c8a51a36c42b22fbfd000d1ff03819f7be6966e7e40ce",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 10125
+    },
+    {
+      "name": "minecraft:oak_planks",
+      "sourceRect": [
+        7680,
+        256,
+        256,
+        256
+      ],
+      "iconRect": [
+        768,
+        512,
+        256,
+        256
+      ],
+      "rgbaSha256": "9f03b16e2371354ae8df69edaa08031f118bca134bd9ddfd1605fbc45e2b267a",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 8946
+    },
+    {
+      "name": "minecraft:bedrock",
+      "sourceRect": [
+        5120,
+        512,
+        256,
+        256
+      ],
+      "iconRect": [
+        0,
+        768,
+        256,
+        256
+      ],
+      "rgbaSha256": "9eda9af899cb072d2329ef26e86cd3e7af6849253b6023759fdddf37163ae5c3",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9494
+    },
+    {
+      "name": "minecraft:sand",
+      "sourceRect": [
+        5376,
+        512,
+        256,
+        256
+      ],
+      "iconRect": [
+        256,
+        768,
+        256,
+        256
+      ],
+      "rgbaSha256": "4519b74c1c5cf4a7898733818b414e52c8f65da1893d955dc264d704889c9894",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9672
+    },
+    {
+      "name": "minecraft:gravel",
+      "sourceRect": [
+        6400,
+        512,
+        256,
+        256
+      ],
+      "iconRect": [
+        512,
+        768,
+        256,
+        256
+      ],
+      "rgbaSha256": "82ad0e44d180d04c941889b027a7efbb5a533ad5a939984fc148cc5940943ce9",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9820
+    },
+    {
+      "name": "minecraft:coal_ore",
+      "sourceRect": [
+        6656,
+        512,
+        256,
+        256
+      ],
+      "iconRect": [
+        768,
+        768,
+        256,
+        256
+      ],
+      "rgbaSha256": "56e42f0d625abe1573d2d30b6d1508817c9a5b11e5d51821ad892648cb9edc74",
+      "alphaBounds": [
+        15,
+        2,
+        241,
+        254
+      ],
+      "byteExact": true,
+      "differentPixelsFromNearest64x4": 9383
+    }
+  ]
+}

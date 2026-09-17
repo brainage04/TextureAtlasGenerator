@@ -1,0 +1,308 @@
+{
+  "source": "exports/b-1600x1000-gui2-256/atlas.png",
+  "sourceSha256": "faa0bfa7d0776dce2f359a9522cafa38c0d204bfa3fe673ffe5af83645db1d3c",
+  "icon": "devutils-legacy-blocks-1024.png",
+  "iconSha256": "cf3ea9705c5194bb24d11af5090ee7051c3dea896eab5313d319390f7c95152e",
+  "size": [
+    1024,
+    1024
+  ],
+  "layout": "4x4",
+  "cellSize": [
+    256,
+    256
+  ],
+  "scaleFactor": 1.0,
+  "resampling": "none",
+  "compositing": "unmasked RGBA paste, every saved cell byte-identical to original export cell",
+  "selections": [
+    {
+      "block": "GRASS",
+      "label": "GRASS_BLOCK (GRASS)",
+      "sourceBox": [
+        1792,
+        0,
+        2048,
+        256
+      ],
+      "iconBox": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "pixelsSha256": "3603341609177f32cc81dc4b168cb40c11b73e0058311e373be61a4f9c167ebc",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "DIRT",
+      "label": "DIRT (DIRT)",
+      "sourceBox": [
+        2048,
+        0,
+        2304,
+        256
+      ],
+      "iconBox": [
+        256,
+        0,
+        512,
+        256
+      ],
+      "pixelsSha256": "d6d52d82f7c4b91c636260ccee633ba4c9ad752abae96a4a0a5daa8fec68b6f8",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "STONE",
+      "label": "STONE (STONE)",
+      "sourceBox": [
+        0,
+        0,
+        256,
+        256
+      ],
+      "iconBox": [
+        512,
+        0,
+        768,
+        256
+      ],
+      "pixelsSha256": "bda0c2fe5682573297486ea0aee4409bfddd2aa1bf8110bc5f7ece92cc841901",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "COBBLESTONE",
+      "label": "COBBLESTONE (COBBLESTONE)",
+      "sourceBox": [
+        2816,
+        0,
+        3072,
+        256
+      ],
+      "iconBox": [
+        768,
+        0,
+        1024,
+        256
+      ],
+      "pixelsSha256": "b7d1a48a48e4a8a2b58bd362f65ecf0001e65d3f847e0088e52ac4bc51749ce9",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "PLANKS",
+      "label": "OAK_WOOD_PLANKS (PLANKS)",
+      "sourceBox": [
+        3072,
+        0,
+        3328,
+        256
+      ],
+      "iconBox": [
+        0,
+        256,
+        256,
+        512
+      ],
+      "pixelsSha256": "e9d8a8571b9bd0753856a46cffa559edf6904bbcfb57c9bd7640b220cf2829c8",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "LOG",
+      "label": "OAK_WOOD (LOG)",
+      "sourceBox": [
+        7936,
+        0,
+        8192,
+        256
+      ],
+      "iconBox": [
+        256,
+        256,
+        512,
+        512
+      ],
+      "pixelsSha256": "d8e304685637056ec31099b630188245b5b6c0686c29926805385771a8fbd33d",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "LEAVES",
+      "label": "OAK_LEAVES (LEAVES)",
+      "sourceBox": [
+        768,
+        256,
+        1024,
+        512
+      ],
+      "iconBox": [
+        512,
+        256,
+        768,
+        512
+      ],
+      "pixelsSha256": "b2458a8e47120239a93025404c297fa32175128a08461836bf86e18328cdf039",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "GLASS",
+      "label": "GLASS (GLASS)",
+      "sourceBox": [
+        2304,
+        256,
+        2560,
+        512
+      ],
+      "iconBox": [
+        768,
+        256,
+        1024,
+        512
+      ],
+      "pixelsSha256": "30ca9bd9f2b5f4fecd8b65297e85960d1d118f3a1131f2b773bd33e7f5bb4125",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "SAND",
+      "label": "SAND (SAND)",
+      "sourceBox": [
+        6400,
+        0,
+        6656,
+        256
+      ],
+      "iconBox": [
+        0,
+        512,
+        256,
+        768
+      ],
+      "pixelsSha256": "e34b439216f26dfe1cbe462eff0ba2f72893631e72c66628ba2fead944d9ffca",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "GRAVEL",
+      "label": "GRAVEL (GRAVEL)",
+      "sourceBox": [
+        6912,
+        0,
+        7168,
+        256
+      ],
+      "iconBox": [
+        256,
+        512,
+        512,
+        768
+      ],
+      "pixelsSha256": "7b364eb849998585c94f6212da183cbd570710d413cadaaab86a9a0a44cfd044",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "BRICK_BLOCK",
+      "label": "BRICKS (BRICK_BLOCK)",
+      "sourceBox": [
+        7680,
+        512,
+        7936,
+        768
+      ],
+      "iconBox": [
+        512,
+        512,
+        768,
+        768
+      ],
+      "pixelsSha256": "b3874e87a046487a67c99e720db66c0befb65dd5b960d4508dfca382567baf99",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "BOOKSHELF",
+      "label": "BOOKSHELF (BOOKSHELF)",
+      "sourceBox": [
+        0,
+        768,
+        256,
+        1024
+      ],
+      "iconBox": [
+        768,
+        512,
+        1024,
+        768
+      ],
+      "pixelsSha256": "ac36ab4a9adf4fec1536638219e27a20f13731c8696bdb60a6c3d1c3575bee02",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "CRAFTING_TABLE",
+      "label": "CRAFTING_TABLE (CRAFTING_TABLE)",
+      "sourceBox": [
+        2304,
+        768,
+        2560,
+        1024
+      ],
+      "iconBox": [
+        0,
+        768,
+        256,
+        1024
+      ],
+      "pixelsSha256": "ac6d5156187ed0a343c3bf91ea984614600950321faa682a0b3f825d9b18d229",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "FURNACE",
+      "label": "FURNACE (FURNACE)",
+      "sourceBox": [
+        2560,
+        768,
+        2816,
+        1024
+      ],
+      "iconBox": [
+        256,
+        768,
+        512,
+        1024
+      ],
+      "pixelsSha256": "09ddd2b9c6cd195909ebe1801203e4c99bdafa4308ac272ae1da2738a26b73fa",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "CHEST",
+      "label": "CHEST (CHEST)",
+      "sourceBox": [
+        1536,
+        768,
+        1792,
+        1024
+      ],
+      "iconBox": [
+        512,
+        768,
+        768,
+        1024
+      ],
+      "pixelsSha256": "faf23ac807ee8ad79b77e726104744427bc4cc385fe9837a23962c023c068984",
+      "scaleFactor": 1.0
+    },
+    {
+      "block": "OBSIDIAN",
+      "label": "OBSIDIAN (OBSIDIAN)",
+      "sourceBox": [
+        512,
+        768,
+        768,
+        1024
+      ],
+      "iconBox": [
+        768,
+        768,
+        1024,
+        1024
+      ],
+      "pixelsSha256": "130b49f7a6e7a5b9240356d1499eaf0199af58af6ce1978b1c8bff48eb3d1883",
+      "scaleFactor": 1.0
+    }
+  ]
+}
