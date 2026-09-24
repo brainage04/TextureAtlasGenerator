@@ -1,15 +1,12 @@
 package io.github.brainage04.textureatlasgenerator.neoforge;
 
 import io.github.brainage04.textureatlasgenerator.TextureAtlasGenerator;
-import io.github.brainage04.textureatlasgenerator.atlas.AtlasExporter;
-import io.github.brainage04.textureatlasgenerator.atlas.AtlasKind;
+import io.github.brainage04.textureatlasgenerator.screen.AtlasCommands;
 import io.github.brainage04.textureatlasgenerator.screen.TextureAtlasScreen;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.Commands;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -48,36 +45,8 @@ public final class TextureAtlasGeneratorNeoForge {
         }
     }
 
+    /** Registers the {@code /atlas} client command; see {@link AtlasCommands}. */
     private void registerCommands(RegisterClientCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("atlas")
-                .executes(context -> open(AtlasKind.VANILLA, AtlasExporter.DEFAULT_PIXEL_SIZE, false))
-                .then(Commands.argument("pixels", IntegerArgumentType.integer(AtlasExporter.MIN_PIXEL_SIZE, AtlasExporter.MAX_PIXEL_SIZE))
-                        .executes(context -> open(AtlasKind.VANILLA, IntegerArgumentType.getInteger(context, "pixels"), true)))
-                .then(atlasType("vanilla", AtlasKind.VANILLA))
-                .then(atlasType("skyblock-all", AtlasKind.SKYBLOCK_ALL))
-                .then(atlasType("skyblock-bazaar", AtlasKind.SKYBLOCK_BAZAAR)));
-        event.getDispatcher().register(Commands.literal("skyblockatlas")
-                .executes(context -> open(AtlasKind.SKYBLOCK_ALL, AtlasExporter.DEFAULT_PIXEL_SIZE, false))
-                .then(Commands.argument("pixels", IntegerArgumentType.integer(AtlasExporter.MIN_PIXEL_SIZE, AtlasExporter.MAX_PIXEL_SIZE))
-                        .then(Commands.argument("fullAtlas", BoolArgumentType.bool()).executes(context -> open(
-                                BoolArgumentType.getBool(context, "fullAtlas") ? AtlasKind.SKYBLOCK_ALL : AtlasKind.SKYBLOCK_BAZAAR,
-                                IntegerArgumentType.getInteger(context, "pixels"), true)))));
-    }
-
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<net.minecraft.commands.CommandSourceStack> atlasType(String literal, AtlasKind kind) {
-        return Commands.literal(literal).executes(context -> open(kind, AtlasExporter.DEFAULT_PIXEL_SIZE, false))
-                .then(Commands.argument("pixels", IntegerArgumentType.integer(AtlasExporter.MIN_PIXEL_SIZE, AtlasExporter.MAX_PIXEL_SIZE))
-                        .executes(context -> open(kind, IntegerArgumentType.getInteger(context, "pixels"), true)));
-    }
-
-    private static int open(AtlasKind kind, int pixels, boolean exportImmediately) {
-        Minecraft client = Minecraft.getInstance();
-        client.execute(() -> {
-            TextureAtlasScreen screen = new TextureAtlasScreen(client.gui.screen());
-            screen.setSelection(kind, pixels);
-            if (exportImmediately) screen.startExportOnOpen();
-            client.gui.setScreen(screen);
-        });
-        return 1;
+        event.getDispatcher().register(AtlasCommands.<CommandSourceStack>create());
     }
 }
