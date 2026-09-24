@@ -25,29 +25,27 @@ the export is GUI-scale/window independent — the 64 px export hashes identical
 survives in the round-3 tree at
 `round3/atlas3/textureatlasgenerator/examples/vanilla_items_256x256.png`.
 
-Cell order (4x4, left to right, top to bottom) — the same 16 identities and positions as the
-DevUtils icon, taken from that icon's stored cell proof rather than from a fresh list:
-GRASS_BLOCK, DIRT, STONE, COBBLESTONE, OAK_WOOD_PLANKS, OAK_WOOD (`minecraft:oak_log`),
-OAK_LEAVES, GLASS, SAND, GRAVEL, BRICKS, BOOKSHELF, CRAFTING_TABLE, FURNACE, CHEST,
-OBSIDIAN.
+Cell order (4x4, left to right, top to bottom), as listed in `BLOCKS` in `compose.py`:
+grass block, dirt, stone, cobblestone, oak planks, oak log, oak leaves, glass, sand, gravel,
+bricks, bookshelf, crafting table, furnace, chest, obsidian.
 
 There is no Minecraft capture and no shader pack involved in this file: it is a 1:1 export of
 an atlas that in turn came from real client-side item rendering.
 
 ## Provenance files
 
-`provenance/` mirrors the round-3 authoring tree `round3/atlas4/`:
+`provenance/` holds the script, its inputs and the records of the round-3 authoring run:
 
 | file | what it is |
 |---|---|
-| `compose.py` | the author script; asserts the legacy order/hashes, crops, pastes, saves and re-verifies |
-| `cells/01-…16-*.png` | the sixteen 256x256 cells exactly as cropped from the export (per-cell sha256 in `icon-proof.json`) |
-| `icon-proof.json` | full per-cell proof: legacy proof hashes, source rectangles, saved-cell RGBA hashes, byte-equality results |
+| `compose.py` | the author script; crops, pastes, saves and re-verifies |
+| `01-…16-*.png` | the sixteen 256x256 cells exactly as cropped from the export (per-cell sha256 in `icon-proof.json`) |
+| `icon-proof.json` | full per-cell proof: source rectangles, saved-cell RGBA hashes, byte-equality results |
 | `manifest.json` | round-3 entry: method, sources, notes, reproduce command, discrepancy resolution |
 | `source-provenance.json` | how the raw export was recovered and hash-verified (it is byte-identical to the archive copy of the fixed export) |
 | `verification-run.json` | both composition runs, their output hashes, and the decoded-pixel comparison summary |
 | `raw-export/vanilla_items_256x256.json` | the export's own item mapping (1536 items, 256 px cells, x/y/width/height per item) |
-| `reference/devutils-icon-proof.json`, `reference/devutils-legacy-blocks-1024.png`, `reference/fixed-export-icon-verification.json` | the DevUtils icon and proof used as the identity/order reference, and the recorded hash of the missing fixed export |
+| `reference/fixed-export-icon-verification.json` | the recorded hash of the missing fixed export |
 | `blockers.json`, `cleanup-report.json` | round-3 records (no blockers; write scope, retained files) |
 
 ## How to regenerate
@@ -69,18 +67,15 @@ cp round3/atlas3/textureatlasgenerator/examples/vanilla_items_256x256.png \
 # b) or re-run the mod's exporter (commit 51ce360) in a Minecraft 26.2 client at 256 px per item
 ```
 
-Then re-run `compose.py`; it rewrites `icon.png`'s source image and the proof and asserts the
-expectations listed in `verification-run.json`. `raw-export/vanilla_items_256x256.json` is
+Then re-run `compose.py`; it rewrites `icon.png`, the sixteen cell PNGs and `icon-proof.json`,
+and asserts that every cell is byte-identical to its source rectangle. `raw-export/vanilla_items_256x256.json` is
 shipped so the item ids and cell rectangles are still auditable without the PNG.
 
 ## Notes
 
 - The raw export PNG is deliberately excluded for size; `source-provenance.json` records its
   sha256 and why the surviving archive copy is provably the same file.
-- `compose.py` also asserts the DevUtils legacy reference (`reference/…`) matches its stored
-  proof — that reference is another mod's icon, kept here only as the identity/order oracle.
-- Not copied from the round-3 tree: `round3/atlas3/**` (the DevUtils export/proof tree) and
-  `round3/atlas4/raw-export/vanilla_items_256x256.png`.
+- Not copied from the round-3 tree: `round3/atlas4/raw-export/vanilla_items_256x256.png`.
 
 ## Working-tree note
 

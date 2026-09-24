@@ -18,11 +18,5 @@
   "all16RequestedItemsPresentInFixedExport": true,
   "regenerated": false,
   "regenerationCommand": null,
-  "regenerationReason": "Unnecessary: every required block is present in the hash-verified surviving copy of the fixed native 256px export.",
-  "legacyReference": "atlas4/reference/devutils-legacy-blocks-1024.png",
-  "legacyReferenceCopiedFrom": "atlas3/devutils/devutils-legacy-blocks-1024.png",
-  "legacyReferenceSha256": "cf3ea9705c5194bb24d11af5090ee7051c3dea896eab5313d319390f7c95152e",
-  "legacyProof": "atlas4/reference/devutils-icon-proof.json",
-  "legacyProofCopiedFrom": "atlas3/devutils/icon-proof.json",
-  "legacyProofSha256": "78a2e1444b6e2c1c49d12a165cd907922f72ff3823f52d610f160c47cd7bae6c"
+  "regenerationReason": "Unnecessary: every required block is present in the hash-verified surviving copy of the fixed native 256px export."
 }

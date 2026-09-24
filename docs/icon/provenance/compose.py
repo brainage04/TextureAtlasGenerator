@@ -7,26 +7,14 @@ from PIL import Image, ImageChops
 ROOT = Path(__file__).resolve().parent
 Image.MAX_IMAGE_PIXELS = 110_000_000  # Verified 8192x12288 native export.
 SOURCE = ROOT / 'raw-export/vanilla_items_256x256.png'
-ICON = ROOT / 'textureatlasgenerator-same-devutils-1024.png'
-LEGACY_ICON = ROOT / 'reference/devutils-legacy-blocks-1024.png'
-MODERN_IDS = {
-    'GRASS': 'grass_block',
-    'DIRT': 'dirt',
-    'STONE': 'stone',
-    'COBBLESTONE': 'cobblestone',
-    'PLANKS': 'oak_planks',
-    'LOG': 'oak_log',
-    'LEAVES': 'oak_leaves',
-    'GLASS': 'glass',
-    'SAND': 'sand',
-    'GRAVEL': 'gravel',
-    'BRICK_BLOCK': 'bricks',
-    'BOOKSHELF': 'bookshelf',
-    'CRAFTING_TABLE': 'crafting_table',
-    'FURNACE': 'furnace',
-    'CHEST': 'chest',
-    'OBSIDIAN': 'obsidian',
-}
+ICON = ROOT.parent / 'icon.png'
+# The 4x4 grid, left to right, top to bottom.
+BLOCKS = [
+    'grass_block', 'dirt', 'stone', 'cobblestone',
+    'oak_planks', 'oak_log', 'oak_leaves', 'glass',
+    'sand', 'gravel', 'bricks', 'bookshelf',
+    'crafting_table', 'furnace', 'chest', 'obsidian',
+]
 
 
 def sha256(path):
@@ -43,51 +31,37 @@ def save_json(name, value):
     (ROOT / name).write_text(json.dumps(value, indent=2) + '\n')
 
 
-legacy_proof = json.loads((ROOT / 'reference/devutils-icon-proof.json').read_text())
 fixed_proof = json.loads((ROOT / 'reference/fixed-export-icon-verification.json').read_text())
 mapping = json.loads(SOURCE.with_suffix('.json').read_text())
-selections = legacy_proof['selections']
 items = {item['name']: item for item in mapping['items']}
 assert len(items) == len(mapping['items']) == 1536
-assert list(MODERN_IDS) == [selection['block'] for selection in selections]
 assert mapping['pixelSize'] == 256
 assert sha256(SOURCE) == fixed_proof['sourceSha256']
-assert sha256(LEGACY_ICON) == legacy_proof['iconSha256']
 
-(ROOT / 'cells').mkdir(exist_ok=True)
 cells = []
-with Image.open(SOURCE) as atlas, Image.open(LEGACY_ICON) as legacy:
-    assert atlas.mode == legacy.mode == 'RGBA'
+with Image.open(SOURCE) as atlas:
+    assert atlas.mode == 'RGBA'
     assert atlas.size == (mapping['width'], mapping['height']) == (8192, 12288)
-    assert legacy.size == (1024, 1024)
     icon = Image.new('RGBA', (1024, 1024))
-    for index, selection in enumerate(selections):
-        modern_id = 'minecraft:' + MODERN_IDS[selection['block']]
+    for index, block in enumerate(BLOCKS):
+        modern_id = 'minecraft:' + block
         item = items[modern_id]
         x, y, width, height = (item[key] for key in ('x', 'y', 'width', 'height'))
         assert width == height == 256
         assert x % 256 == y % 256 == 0
         source_box = (x, y, x + width, y + height)
-        icon_box = tuple(selection['iconBox'])
         dx, dy = index % 4 * 256, index // 4 * 256
-        assert icon_box == (dx, dy, dx + 256, dy + 256)
-        legacy_cell = legacy.crop(icon_box)
-        assert rgba_sha256(legacy_cell) == selection['pixelsSha256']
+        icon_box = (dx, dy, dx + 256, dy + 256)
         cell = atlas.crop(source_box)
         assert cell.getchannel('A').getbbox() is not None
         icon.paste(cell, (dx, dy))  # Unmasked paste: preserve every RGBA byte.
-        cell_path = ROOT / f'cells/{index + 1:02d}-{MODERN_IDS[selection["block"]]}.png'
+        cell_path = ROOT / f'{index + 1:02d}-{block}.png'
         cell.save(cell_path)
         cells.append({
             'index': index,
             'row': index // 4,
             'column': index % 4,
-            'legacyBlock': selection['block'],
-            'legacyLabel': selection['label'],
             'modernId': modern_id,
-            'legacyIconBox': icon_box,
-            'legacyPixelsSha256': rgba_sha256(legacy_cell),
-            'legacyProofHashMatches': True,
             'sourceExport': str(SOURCE.relative_to(ROOT)),
             'sourceExportSha256': sha256(SOURCE) if index == 0 else cells[0]['sourceExportSha256'],
             'sourceItemIndex': item['index'],
@@ -136,12 +110,6 @@ proof = {
     'sourceSha256': sha256(SOURCE),
     'sourceSize': [8192, 12288],
     'sourceMetadataSha256': sha256(SOURCE.with_suffix('.json')),
-    'legacyReference': str(LEGACY_ICON.relative_to(ROOT)),
-    'legacyReferenceSha256': sha256(LEGACY_ICON),
-    'legacyProof': 'reference/devutils-icon-proof.json',
-    'legacyProofSha256': sha256(ROOT / 'reference/devutils-icon-proof.json'),
-    'all16LegacyProofHashesMatchSavedReference': True,
-    'all16IdentitiesAndPositionsMatchLegacy': True,
     'all16SavedCellsByteIdenticalToSource': True,
     'all16SavedIconCellsByteIdenticalToSource': True,
     'totalComparedIconRgbaBytes': sum(cell['comparedBytes'] for cell in cells),

@@ -2,11 +2,6 @@
   "blockers": [],
   "resolvedFindings": [
     {
-      "issue": "Initial assignment's 16-block list did not match the named DevUtils icon or its proof.",
-      "evidence": "The actual reference PNG SHA256 is cf3ea9705c5194bb24d11af5090ee7051c3dea896eab5313d319390f7c95152e, matching atlas3/devutils/icon-proof.json. All 16 reference cell pixel hashes match that proof. The verified order starts GRASS_BLOCK, DIRT, STONE, COBBLESTONE and includes OAK_LEAVES, GLASS, BRICKS, BOOKSHELF, CRAFTING_TABLE, FURNACE, CHEST, OBSIDIAN.",
-      "resolution": "Main confirmed the proof as source of truth. The generated modern icon uses exactly those identities and positions, with every legacy identity mapped to an existing modern id."
-    },
-    {
       "issue": "The fixed/config-0 PNG was absent; only its JSON metadata remained.",
       "evidence": "atlas3/textureatlasgenerator/examples/vanilla_items_256x256.png survives and hashes to c9baa75bac9a498b4d3a5be106ca75163e4d3e33aaa599618f7aba4485cdd681, exactly the recorded source hash of the missing fixed export. Its metadata is byte-identical to fixed/config-0 metadata.",
       "resolution": "Saved that verified unmodified raw export under atlas4/raw-export. All required native 256x256 cells are present; no regeneration was necessary."

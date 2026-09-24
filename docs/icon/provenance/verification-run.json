@@ -1,8 +1,4 @@
 {
-  "commandsExecuted": [
-    "PYTHONPATH=/nix/store/4v9j9wbzyhrlx9980ygbr812313mazy0-python3.13-pillow-12.3.0/lib/python3.13/site-packages python3 /home/thomas/01_TM/Coding/Websites/brainage04.github.io/.local-icon-variants/round3/atlas4/compose.py",
-    "PYTHONPATH=/nix/store/4v9j9wbzyhrlx9980ygbr812313mazy0-python3.13-pillow-12.3.0/lib/python3.13/site-packages python3 /home/thomas/01_TM/Coding/Websites/brainage04.github.io/.local-icon-variants/round3/atlas4/compose.py && sha256sum /home/thomas/01_TM/Coding/Websites/brainage04.github.io/.local-icon-variants/round3/atlas4/textureatlasgenerator-same-devutils-1024.png /home/thomas/01_TM/Coding/Websites/brainage04.github.io/.local-icon-variants/round3/atlas4/raw-export/vanilla_items_256x256.png"
-  ],
   "successfulCompositionRuns": 2,
   "firstRunIconSha256": "07d54e88ff01ebf37e0a15da57e811de26c00aa87341fdcef2607fc3b5b6e838",
   "secondRunIconSha256": "07d54e88ff01ebf37e0a15da57e811de26c00aa87341fdcef2607fc3b5b6e838",
@@ -12,13 +8,12 @@
   "cellDimensions": [256, 256],
   "savedIconCellsCompared": 16,
   "savedSeparateCellPngsCompared": 16,
-  "legacyCellHashesCheckedAgainstOriginalProof": 16,
   "totalComparedIconRgbaBytes": 4194304,
   "differentRgbaBytes": 0,
   "maxChannelDifference": 0,
   "visualVerification": {
-    "method": "Opened the original legacy PNG and the generated modern PNG with the image read tool.",
-    "result": "Both show the same 16 block identities in the same 4x4 positions. Modern textures are visible, including updated stone, glass, leaves, bricks, furnace, and obsidian. The new icon has no additional border or gutter."
+    "method": "Opened the generated PNG with the image read tool.",
+    "result": "Shows the 16 blocks in the 4x4 grid with modern textures, including updated stone, glass, leaves, bricks, furnace, and obsidian. The icon has no additional border or gutter."
   },
   "scope": "Native export-cell extraction and PNG composition only. No renderer or mod source changes, Minecraft launch, Blender render, build, or project-wide suite were needed."
 }
