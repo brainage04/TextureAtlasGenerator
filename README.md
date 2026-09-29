@@ -83,7 +83,7 @@ The 64 px loop is about 9 MB.
 
 - Minecraft 26.2
 - Java 25 or newer
-- Either Fabric Loader 0.19.3 or newer with Fabric API, or NeoForge 26.2.0.23-beta or newer.
+- Either Fabric Loader 0.19.3 or newer with Fabric API, or NeoForge 26.2.0.88 or newer.
 
 Mod Menu is optional on Fabric.
 
