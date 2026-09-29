@@ -9,7 +9,7 @@ displayName="Texture Atlas Generator"
 description='''Generate vanilla and Hypixel SkyBlock texture atlases.'''
 authors="brainage04"
 displayURL="https://github.com/brainage04/TextureAtlasGenerator"
-logoFile="assets/textureatlasgenerator/icon.png"
+iconFile="assets/textureatlasgenerator/icon.png"
 
 [[dependencies.textureatlasgenerator]]
 modId="neoforge"
