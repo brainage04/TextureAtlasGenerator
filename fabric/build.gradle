@@ -1,11 +1,12 @@
 repositories {
 	exclusiveContent {
-		forRepository { maven { url = "https://api.modrinth.com/maven" } }
-		filter { includeGroup "maven.modrinth" }
+		forRepository { maven { url = "https://maven.terraformersmc.com/releases/" } }
+		filter { includeGroup "com.terraformersmc" }
 	}
 }
 
 dependencies {
-	implementation "maven.modrinth:modmenu:${project.modmenu_version}"
-	productionRuntimeMods "maven.modrinth:modmenu:${project.modmenu_version}"
+	// ModMenu
+	implementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") { exclude group: "net.fabricmc.fabric-api" }
+	productionRuntimeMods("com.terraformersmc:modmenu:${rootProject.modmenu_version}") { exclude group: "net.fabricmc.fabric-api" }
 }

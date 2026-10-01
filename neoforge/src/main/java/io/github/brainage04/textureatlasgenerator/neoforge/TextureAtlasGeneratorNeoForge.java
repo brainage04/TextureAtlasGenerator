@@ -10,10 +10,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
@@ -26,7 +28,9 @@ public final class TextureAtlasGeneratorNeoForge {
             "key.textureatlasgenerator.open_screen", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY
     );
 
-    public TextureAtlasGeneratorNeoForge(IEventBus modBus) {
+    public TextureAtlasGeneratorNeoForge(IEventBus modBus, ModContainer container) {
+        // The mods list opens the atlas tool, as Mod Menu does on Fabric.
+        container.registerExtensionPoint(IConfigScreenFactory.class, (modContainer, parent) -> new TextureAtlasScreen(parent));
         modBus.addListener(this::registerKeyMappings);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onClientTick);
