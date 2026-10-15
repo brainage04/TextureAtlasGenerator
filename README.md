@@ -86,16 +86,3 @@ The 64 px loop is about 9 MB.
 - Either Fabric Loader 0.19.3 or newer with Fabric API, or NeoForge 26.2.0.88 or newer.
 
 Mod Menu is optional on Fabric.
-
-## Migrating from the Fabric-only release
-
-Install exactly one loader-specific JAR: `textureatlasgenerator-<version>.jar` for Fabric or
-`textureatlasgenerator-neoforge-<version>.jar` for NeoForge. Remove the old JAR before
-switching loaders; this is a client-only mod and belongs only in the client instance's `mods`
-directory. Fabric additionally requires Fabric API; NeoForge has no extra mod dependency.
-
-The mod ID remains `textureatlasgenerator`, and generated atlas files keep their existing
-`texture-atlases/` instance path. A root `./gradlew build` produces both loader artifacts under
-`build/libs`.
-
-`/skyblockatlas` has been removed; use `/atlas skyblock-all` or `/atlas skyblock-bazaar`.
