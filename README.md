@@ -52,3 +52,4 @@ Player-head skins are downloaded before rendering. If any skin cannot be loaded,
 - [Export files](docs/EXPORTS.md) - image layout, mappings and glint stylesheets.
 - [Release process](docs/RELEASE.md) - maintainer release instructions.
 - [Modrinth publishing](docs/MODRINTH.md) - publishing setup.
+- [Development](docs/DEVELOPMENT.md) - test review and coverage notes.
