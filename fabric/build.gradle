@@ -6,6 +6,7 @@ repositories {
 }
 
 dependencies {
+	testImplementation "com.twelvemonkeys.imageio:imageio-webp:3.12.0"
 	// ModMenu
 	implementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") { exclude group: "net.fabricmc.fabric-api" }
 	productionRuntimeMods("com.terraformersmc:modmenu:${rootProject.modmenu_version}") { exclude group: "net.fabricmc.fabric-api" }

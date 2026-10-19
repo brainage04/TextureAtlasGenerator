@@ -14,6 +14,8 @@ import io.github.brainage04.textureatlasgenerator.atlas.SkyBlockData;
 import io.github.brainage04.textureatlasgenerator.screen.TextureAtlasScreen;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.lwjgl.glfw.GLFW;
@@ -53,6 +55,10 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
             }
         });
         ClientGameTestServers.assertClientWorldAndPlayerAvailable(context);
+        context.getInput().pressKey(GLFW.GLFW_KEY_G);
+        context.waitForScreen(TextureAtlasScreen.class);
+        verifySizeControls(context);
+        context.runOnClient(client -> client.gui.setScreen(null));
         context.waitTicks(20);
 
         ClientGameTestRecorder.startRecording(context);
@@ -73,9 +79,12 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
 
         List<AtlasCatalog.Entry> vanillaCatalog = AtlasCatalog.create(AtlasKind.VANILLA);
         int potionVariants = BuiltInRegistries.POTION.size() + 1;
-        long potionStacks = vanillaCatalog.stream().filter(entry -> entry.name().startsWith("minecraft:potion")).count();
-        if (potionStacks != potionVariants) {
-            throw new AssertionError("Expected " + potionVariants + " potion stacks (every potion plus the uncraftable default), found " + potionStacks);
+        for (String id : List.of("potion", "splash_potion", "lingering_potion", "tipped_arrow")) {
+            long count = vanillaCatalog.stream().filter(entry -> entry.name().equals("minecraft:" + id)
+                    || entry.name().startsWith("minecraft:" + id + "[")).count();
+            if (count != potionVariants) {
+                throw new AssertionError("Expected " + potionVariants + " variants for " + id + ", found " + count);
+            }
         }
         JsonObject vanilla = export(context, AtlasKind.VANILLA, 1200);
         if (vanilla.get("items").getAsJsonArray().size() != vanillaCatalog.size()) {
@@ -87,6 +96,15 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         if (paged.pages().size() < 2 || paged.entryCount() != vanillaCatalog.size()
                 || paged.pages().stream().anyMatch(page -> page.side(AtlasExporter.MAX_PIXEL_SIZE) > AtlasLayout.MAX_PAGE_SIDE)) {
             throw new AssertionError("Unexpected 1024 px vanilla layout " + paged);
+        }
+        List<Path> vanillaOutputs = outputs(context, AtlasExporter.fileBase(AtlasKind.VANILLA, PIXEL_SIZE), EXTENSIONS);
+        List<byte[]> firstExport = readOutputs(vanillaOutputs);
+        export(context, AtlasKind.VANILLA, 1200);
+        List<byte[]> repeatedExport = readOutputs(vanillaOutputs);
+        for (int index = 0; index < firstExport.size(); index++) {
+            if (!java.util.Arrays.equals(firstExport.get(index), repeatedExport.get(index))) {
+                throw new AssertionError("Repeated export changed " + vanillaOutputs.get(index));
+            }
         }
 
         exportGlint(context);
@@ -106,6 +124,40 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         context.takeScreenshot("texture-atlas-hypixel-skyblock-bazaar-items-catalog");
     }
 
+    private static void verifySizeControls(ClientGameTestContext context) {
+        context.runOnClient(client -> {
+            TextureAtlasScreen screen = (TextureAtlasScreen) client.gui.screen();
+            EditBox size = screen.children().stream().filter(EditBox.class::isInstance)
+                    .map(EditBox.class::cast).filter(box -> box.getMessage().getString().equals("Pixel size"))
+                    .findFirst().orElseThrow();
+            Button export = screen.children().stream().filter(Button.class::isInstance)
+                    .map(Button.class::cast).filter(button -> button.getMessage().getString().equals("Export atlas"))
+                    .findFirst().orElseThrow();
+            for (String invalid : List.of("", "0", "1025", "-1", "abc")) {
+                size.setValue(invalid);
+                if (export.active) {
+                    throw new AssertionError("Export enabled for invalid size " + invalid);
+                }
+            }
+            size.setValue("13");
+            if (!export.active) {
+                throw new AssertionError("Export disabled for a valid non-power-of-two size");
+            }
+        });
+    }
+
+    private static List<byte[]> readOutputs(List<Path> paths) {
+        try {
+            List<byte[]> result = new ArrayList<>();
+            for (Path path : paths) {
+                result.add(Files.readAllBytes(path));
+            }
+            return result;
+        } catch (Exception error) {
+            throw new AssertionError("Unable to read exported files", error);
+        }
+    }
+
     /** Types {@code command} into the chat screen and submits it with Enter, as a player would. */
     private static void runChatCommand(ClientGameTestContext context, String command) {
         context.setScreen(() -> new ChatScreen(command, false));
@@ -123,6 +175,13 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
                 command + " renders the atlas and shows its progress"
         );
         List<Path> outputs = outputs(context, AtlasExporter.fileBase(kind, PIXEL_SIZE), EXTENSIONS);
+        try {
+            for (Path output : outputs) {
+                Files.deleteIfExists(output);
+            }
+        } catch (Exception error) {
+            throw new AssertionError("Unable to remove previous export", error);
+        }
 
         runChatCommand(context, command);
         context.waitForScreen(TextureAtlasScreen.class);
