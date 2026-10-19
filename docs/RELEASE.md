@@ -12,6 +12,6 @@ The release workflow reads the annotated tag message and uses it as the GitHub r
 If the tag has no annotation text, GitHub auto-generated release notes are used as a fallback.
 GitHub Actions checks out tag pushes in a way that can obscure annotated tag contents, so the workflow fetches the remote tag object before reading the notes.
 
-The FabricModdingConventions reusable release workflow builds both loader JARs and attaches the Fabric and NeoForge artifacts to the GitHub Release.
+The MinecraftModConventions reusable release workflow builds both loader JARs and attaches the Fabric and NeoForge artifacts to the GitHub Release.
 If `MODRINTH_TOKEN` is configured, the same workflow publishes both loader JARs and the release notes to Modrinth. CurseForge publishing is turned off (`publish_curseforge: false`).
 All destinations use the same tag notes. A missing `MODRINTH_TOKEN` skips only Modrinth; the GitHub Release still proceeds.

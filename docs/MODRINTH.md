@@ -1,6 +1,6 @@
 # Modrinth publishing
 
-Modrinth publishing is performed by the FabricModdingConventions reusable `release.yml` workflow. It publishes the exact Fabric and NeoForge release JARs prepared from a matching `v<mod_version>` tag; see [RELEASE.md](RELEASE.md).
+Modrinth publishing is performed by the MinecraftModConventions reusable `release.yml` workflow. It publishes the exact Fabric and NeoForge release JARs prepared from a matching `v<mod_version>` tag; see [RELEASE.md](RELEASE.md).
 
 ## Required configuration
 

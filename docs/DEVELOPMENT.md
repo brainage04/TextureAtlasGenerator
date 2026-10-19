@@ -3,5 +3,5 @@
 ## Running the suite
 
 ```sh
-heavy --mem 8G -- env ALSOFT_DRIVERS=null ./gradlew --no-daemon build runAllGameTests --continue -Pfabricmoddingconventions.devClientOptions=/nonexistent
+heavy --mem 8G -- env ALSOFT_DRIVERS=null ./gradlew --no-daemon build runAllGameTests --continue
 ```
