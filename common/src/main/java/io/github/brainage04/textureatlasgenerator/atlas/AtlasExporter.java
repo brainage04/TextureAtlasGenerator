@@ -281,14 +281,17 @@ public final class AtlasExporter {
         }
         AtlasMappings mappings = new AtlasMappings(kind, entries, layout, imageNames, extra);
         Util.ioPool().execute(() -> {
-            List<Path> temporaryMappings = new ArrayList<>();
+            List<Path> temporaryMappings = List.of(
+                    outputDirectory.resolve(fileBase + ".json.tmp"),
+                    outputDirectory.resolve(fileBase + ".txt.tmp"),
+                    outputDirectory.resolve(fileBase + ".css.tmp"));
             try {
                 Path json = outputDirectory.resolve(fileBase + ".json");
                 Path text = outputDirectory.resolve(fileBase + ".txt");
                 Path css = outputDirectory.resolve(fileBase + ".css");
-                temporaryMappings.add(writeTemporary(json, mappings.json()));
-                temporaryMappings.add(writeTemporary(text, mappings.text()));
-                temporaryMappings.add(writeTemporary(css, mappings.css()));
+                writeTemporary(temporaryMappings.get(0), mappings.json());
+                writeTemporary(temporaryMappings.get(1), mappings.text());
+                writeTemporary(temporaryMappings.get(2), mappings.css());
                 List<Path> images = new ArrayList<>();
                 for (int index = 0; index < imageNames.size(); index++) {
                     Path imagePath = outputDirectory.resolve(imageNames.get(index));
@@ -312,10 +315,8 @@ public final class AtlasExporter {
         });
     }
 
-    static Path writeTemporary(Path destination, String contents) throws IOException {
-        Path temporary = destination.resolveSibling(destination.getFileName() + ".tmp");
+    static void writeTemporary(Path temporary, String contents) throws IOException {
         Files.writeString(temporary, contents, StandardCharsets.UTF_8);
-        return temporary;
     }
 
     static void replace(Path source, Path destination) throws IOException {

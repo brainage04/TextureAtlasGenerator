@@ -157,9 +157,9 @@ public final class GlintExporter {
         Path temporaryJson = directory.resolve(fileBase + ".json.tmp");
         Path temporaryCss = directory.resolve(fileBase + ".css.tmp");
         try {
-            AtlasExporter.writeTemporary(json, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping()
+            AtlasExporter.writeTemporary(temporaryJson, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping()
                     .create().toJson(description(imageName)) + '\n');
-            AtlasExporter.writeTemporary(css, css(imageName));
+            AtlasExporter.writeTemporary(temporaryCss, css(imageName));
             AtlasExporter.replace(temporary, image);
             AtlasExporter.replace(temporaryJson, json);
             AtlasExporter.replace(temporaryCss, css);

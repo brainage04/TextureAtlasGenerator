@@ -14,6 +14,8 @@ texture-atlases/<atlas>_<size>x<size>.css
 
 Images are lossless WebP, written by the mod's own encoder. A page is written as PNG instead only if the Java heap cannot hold it for encoding; its JSON then records why in `formatNote`.
 
+If writing a mapping fails, the export removes its temporary mapping and image files.
+
 Every entry has a unique `name`:
 
 - Vanilla: namespaced item ID; potion variants use `/give` syntax, for example `minecraft:stone` or `minecraft:potion[potion_contents="minecraft:swiftness"]`.
