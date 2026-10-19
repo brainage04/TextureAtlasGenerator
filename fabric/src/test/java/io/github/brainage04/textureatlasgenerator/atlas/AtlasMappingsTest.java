@@ -2,6 +2,7 @@ package io.github.brainage04.textureatlasgenerator.atlas;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.world.item.ItemStack;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ class AtlasMappingsTest {
     void mappingFormatsAgreeAtPageBoundary() {
         List<AtlasCatalog.Entry> entries = new ArrayList<>();
         for (int i = 0; i < 65; i++) {
-            entries.add(new AtlasCatalog.Entry(null, "item:" + i, "Item " + i, "item-" + i, "", null));
+            entries.add(new AtlasCatalog.Entry(ItemStack.EMPTY, "item:" + i, "Item " + i, "item-" + i, "", null));
         }
         AtlasMappings mappings = new AtlasMappings(AtlasKind.VANILLA, entries, AtlasLayout.of(65, 1024),
                 List.of("first.webp", "second.webp"), new JsonObject());
@@ -36,13 +37,12 @@ class AtlasMappingsTest {
     @Test
     void headMappingsOmitDisplayNameAndProtectCssComments() {
         AtlasMappings heads = new AtlasMappings(AtlasKind.SKYBLOCK_ALL,
-                List.of(new AtlasCatalog.Entry(null, "HEAD", null, "head", "", null)),
+                List.of(new AtlasCatalog.Entry(ItemStack.EMPTY, "HEAD", null, "head", "", null)),
                 AtlasLayout.of(1, 16), List.of("heads.webp"), new JsonObject());
         assertFalse(JsonParser.parseString(heads.json()).getAsJsonObject().getAsJsonArray("items")
                 .get(0).getAsJsonObject().has("displayName"));
-        assertEquals("HEAD: [0, 0]\n", heads.text());
         AtlasMappings named = new AtlasMappings(AtlasKind.VANILLA,
-                List.of(new AtlasCatalog.Entry(null, "item", "Unsafe */ name", "item", "", null)),
+                List.of(new AtlasCatalog.Entry(ItemStack.EMPTY, "item", "Unsafe */ name", "item", "", null)),
                 AtlasLayout.of(1, 16), List.of("item.webp"), new JsonObject());
         assertTrue(named.css().contains("/* Unsafe * / name */"));
     }

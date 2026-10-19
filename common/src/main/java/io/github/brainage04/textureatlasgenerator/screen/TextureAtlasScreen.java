@@ -89,6 +89,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
 
     @Override
     protected void init() {
+        String search = searchBox == null ? "" : searchBox.getValue();
         if (preview == null) {
             preview = new AtlasPreview(Minecraft.getInstance());
         }
@@ -151,6 +152,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
                 Component.literal("Search atlas items")
         ));
         searchBox.setHint(Component.literal("Search by item name or identifier"));
+        searchBox.setValue(search);
         searchBox.setResponder(ignored -> applySearch());
         glintButton = addRenderableWidget(Button.builder(
                 Component.literal("Export glint"),
@@ -165,6 +167,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
             reloadCatalog();
         } else {
             applySearch();
+            configurePreview();
         }
         updateControls();
         if (exportOnOpen) {
@@ -285,7 +288,10 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     @Override
     public void removed() {
         super.removed();
-        preview.close();
+        if (preview != null) {
+            preview.close();
+            preview = null;
+        }
     }
 
     @Override
@@ -339,7 +345,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
                 ? catalog.size() + " items"
                 : filtered.length + " of " + catalog.size() + " items";
         String previewStatus = preview.status();
-        graphics.text(font, previewStatus == null ? count : count + " — " + previewStatus, left, bottom + 6, 0xFFA0A0A0);
+        graphics.text(font, previewStatus == null ? count : count + " – " + previewStatus, left, bottom + 6, 0xFFA0A0A0);
     }
 
     private void renderStatus(GuiGraphicsExtractor graphics) {

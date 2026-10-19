@@ -154,17 +154,18 @@ public final class GlintExporter {
         Path image = directory.resolve(imageName);
         Path json = directory.resolve(fileBase + ".json");
         Path css = directory.resolve(fileBase + ".css");
-        Path temporaryJson = AtlasExporter.writeTemporary(json, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping()
-                .create().toJson(description(imageName)) + '\n');
-        Path temporaryCss = AtlasExporter.writeTemporary(css, css(imageName));
+        Path temporaryJson = directory.resolve(fileBase + ".json.tmp");
+        Path temporaryCss = directory.resolve(fileBase + ".css.tmp");
         try {
+            AtlasExporter.writeTemporary(json, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping()
+                    .create().toJson(description(imageName)) + '\n');
+            AtlasExporter.writeTemporary(css, css(imageName));
             AtlasExporter.replace(temporary, image);
             AtlasExporter.replace(temporaryJson, json);
             AtlasExporter.replace(temporaryCss, css);
-        } catch (IOException error) {
+        } finally {
             AtlasExporter.deleteQuietly(temporaryJson);
             AtlasExporter.deleteQuietly(temporaryCss);
-            throw error;
         }
         return new AtlasExporter.Result(
                 "the " + (FRAMES * FRAME_MILLIS / 1000.0) + " s enchantment glint loop (" + FRAMES + " frames)",

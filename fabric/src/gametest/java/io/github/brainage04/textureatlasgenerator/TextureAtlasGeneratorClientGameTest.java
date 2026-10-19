@@ -17,6 +17,10 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.lwjgl.glfw.GLFW;
 
@@ -42,6 +46,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
     public void runTest(ClientGameTestContext context) {
         Properties serverProperties = ClientGameTestServers.flatServerProperties();
         ClientGameTestServers.withDedicatedServer(context, serverProperties, "Texture Atlas Generator GameTest", server -> { try {
+            cleanupOutputs(context);
             runConnectedTest(context);
         } finally {
             cleanupOutputs(context);
@@ -58,6 +63,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         context.getInput().pressKey(GLFW.GLFW_KEY_G);
         context.waitForScreen(TextureAtlasScreen.class);
         verifySizeControls(context);
+        verifyReopenedPreview(context);
         context.runOnClient(client -> client.gui.setScreen(null));
         context.waitTicks(20);
 
@@ -108,6 +114,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         }
 
         exportGlint(context);
+        verifyFailedGlintCleansMappings(context);
 
         if (AtlasCatalog.create(AtlasKind.SKYBLOCK_BAZAAR).size() != 351) {
             throw new AssertionError("Expected all 351 legacy Bazaar entries in the deterministic catalog");
@@ -144,6 +151,65 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
                 throw new AssertionError("Export disabled for a valid non-power-of-two size");
             }
         });
+    }
+
+    private static void verifyReopenedPreview(ClientGameTestContext context) {
+        Identifier preview = Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "atlas_preview");
+        context.waitFor(client -> client.getTextureManager().getTexture(preview) instanceof DynamicTexture, 200);
+        context.runOnClient(client -> {
+            TextureAtlasScreen screen = (TextureAtlasScreen) client.gui.screen();
+            EditBox search = screen.children().stream().filter(EditBox.class::isInstance)
+                    .map(EditBox.class::cast).filter(box -> box.getMessage().getString().equals("Search atlas items"))
+                    .findFirst().orElseThrow();
+            search.setValue("diamond");
+            client.gui.setScreen(new Screen(Component.literal("Child screen")) {});
+            client.gui.setScreen(screen);
+            EditBox restored = screen.children().stream().filter(EditBox.class::isInstance)
+                    .map(EditBox.class::cast).filter(box -> box.getMessage().getString().equals("Search atlas items"))
+                    .findFirst().orElseThrow();
+            if (!restored.getValue().equals("diamond")) {
+                throw new AssertionError("Search was lost when the generator was reinitialized");
+            }
+        });
+        context.waitFor(client -> client.getTextureManager().getTexture(preview) instanceof DynamicTexture, 200);
+    }
+
+    private static void verifyFailedGlintCleansMappings(ClientGameTestContext context) {
+        Path directory = outputs(context, "unused", List.of(".json")).getFirst().getParent();
+        String base = GlintExporter.FILE_STEM + "_1x1";
+        Path blockedCss = directory.resolve(base + ".css.tmp");
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        try {
+            Files.createDirectory(blockedCss);
+            context.runOnClient(client -> {
+                if (!GlintExporter.start(client, 1, new AtlasExporter.Listener() {
+                    @Override public void onProgress(AtlasExporter.Progress progress) {}
+                    @Override public void onSuccess(AtlasExporter.Result result) {
+                        failure.set(new AssertionError("Glint export unexpectedly succeeded"));
+                    }
+                    @Override public void onFailure(Throwable error) { failure.set(error); }
+                })) {
+                    throw new AssertionError("Previous export still holds the export slot");
+                }
+            });
+            context.waitFor(client -> failure.get() != null && !AtlasExporter.isExporting(), 1200);
+            if (!(failure.get() instanceof java.io.IOException)) {
+                throw new AssertionError("Expected an I/O failure", failure.get());
+            }
+            for (String suffix : List.of(".json.tmp", ".css.tmp", ".tmp.webp", ".webp", ".json", ".css")) {
+                if (Files.exists(directory.resolve(base + suffix))) {
+                    throw new AssertionError("Failed glint export left " + base + suffix);
+                }
+            }
+        } catch (java.io.IOException error) {
+            throw new AssertionError("Unable to prepare failed glint export", error);
+        } finally {
+            try {
+                Files.deleteIfExists(blockedCss);
+            } catch (java.io.IOException error) {
+                throw new AssertionError("Unable to clean failed-export fixture", error);
+            }
+        }
     }
 
     private static List<byte[]> readOutputs(List<Path> paths) {
