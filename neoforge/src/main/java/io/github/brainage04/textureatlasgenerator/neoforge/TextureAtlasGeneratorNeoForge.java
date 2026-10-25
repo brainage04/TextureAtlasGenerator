@@ -17,7 +17,6 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
-import org.lwjgl.glfw.GLFW;
 
 @Mod(value = TextureAtlasGenerator.MOD_ID, dist = Dist.CLIENT)
 public final class TextureAtlasGeneratorNeoForge {
@@ -25,7 +24,7 @@ public final class TextureAtlasGeneratorNeoForge {
             Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "general")
     );
     private static final KeyMapping OPEN_ATLAS_SCREEN = new KeyMapping(
-            "key.textureatlasgenerator.open_screen", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY
+            "key.textureatlasgenerator.open_screen", InputConstants.Type.KEYBOARD, InputConstants.KEY_G, CATEGORY
     );
 
     public TextureAtlasGeneratorNeoForge(IEventBus modBus, ModContainer container) {
