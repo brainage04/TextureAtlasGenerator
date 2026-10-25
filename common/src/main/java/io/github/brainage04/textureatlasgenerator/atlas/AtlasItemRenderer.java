@@ -1,11 +1,11 @@
 package io.github.brainage04.textureatlasgenerator.atlas;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.CommandEncoder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.GuiRenderer;
@@ -174,7 +174,7 @@ final class AtlasItemRenderer {
                 target.getColorTexture(),
                 GuiRenderer.CLEAR_COLOR,
                 target.getDepthTexture(),
-                1.0
+                RenderSystem.DEFAULT_DEPTH_CLEAR_VALUE
         );
     }
 

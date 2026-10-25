@@ -3,6 +3,7 @@ package io.github.brainage04.textureatlasgenerator;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.brainage04.minecraftmodconventions.ClientGameTestRecorder;
 import io.github.brainage04.minecraftmodconventions.ClientGameTestServers;
 import io.github.brainage04.textureatlasgenerator.atlas.AtlasCatalog;
@@ -22,7 +23,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.core.registries.BuiltInRegistries;
-import org.lwjgl.glfw.GLFW;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -60,7 +60,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
             }
         });
         ClientGameTestServers.assertClientWorldAndPlayerAvailable(context);
-        context.getInput().pressKey(GLFW.GLFW_KEY_G);
+        context.getInput().pressKey(InputConstants.KEY_G);
         context.waitForScreen(TextureAtlasScreen.class);
         verifySizeControls(context);
         verifyReopenedPreview(context);
@@ -230,7 +230,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
     private static void runChatCommand(ClientGameTestContext context, String command) {
         context.setScreen(() -> new ChatScreen(command, false));
         context.waitTicks(2);
-        context.getInput().pressKey(GLFW.GLFW_KEY_ENTER);
+        context.getInput().pressKey(InputConstants.KEY_RETURN);
     }
 
     private static JsonObject export(ClientGameTestContext context, AtlasKind kind, int timeoutTicks) {

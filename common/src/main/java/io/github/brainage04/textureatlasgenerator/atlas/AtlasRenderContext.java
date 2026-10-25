@@ -1,8 +1,7 @@
 package io.github.brainage04.textureatlasgenerator.atlas;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.DeltaTracker;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlobalSettingsUniform;
 import net.minecraft.client.renderer.texture.SpriteContents;
@@ -31,7 +30,7 @@ final class AtlasRenderContext implements AutoCloseable {
     }
 
     void apply(int width, int height) {
-        globals.update(width, height, 0.75, 0, DeltaTracker.ZERO, 0, Vec3.ZERO, false);
+        globals.update(width, height, 0.75, 0, 0.0F, 0, Vec3.ZERO, false);
         for (AnimationSnapshot snapshot : animations) {
             snapshot.state.frame = 0;
             snapshot.state.subFrame = 0;

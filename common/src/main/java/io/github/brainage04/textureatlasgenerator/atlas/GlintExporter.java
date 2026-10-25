@@ -24,7 +24,7 @@ import java.util.Optional;
  * Exports one atlas cell of the item enchantment glint as a looping animated WebP on a
  * transparent background, for drawing over website icons.
  *
- * <p>The glint is computed exactly as 26.2 draws it on an item in the inventory, rather than
+ * <p>The glint is computed exactly as 26.3 draws it on an item in the inventory, rather than
  * captured from the screen: the {@code enchanted_glint_item} texture (bilinear, repeating) is
  * sampled through {@code TextureTransform.GLINT_TEXTURING} at the enchanted book sprite's
  * item-atlas UVs, scaled by the default glint strength and blended with {@code BlendFunction.GLINT}
@@ -248,7 +248,7 @@ public final class GlintExporter {
         json.addProperty("usage", "Draw over an icon with mix-blend-mode: plus-lighter, masked by the icon's alpha "
                 + "(see the .css file). Each pixel's colour times its alpha is what Minecraft adds to the icon.");
         JsonObject source = new JsonObject();
-        source.addProperty("minecraft", "26.2");
+        source.addProperty("minecraft", "26.3");
         source.addProperty("texture", ItemFeatureRenderer.ENCHANTED_GLINT_ITEM.toString());
         source.addProperty("sprite", REFERENCE_SPRITE.toString());
         JsonArray uv = new JsonArray();

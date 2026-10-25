@@ -1,6 +1,6 @@
 # Texture Atlas Generator
 
-A client-side Fabric and NeoForge mod for Minecraft 26.2 that exports item-model texture atlases from inside Minecraft.
+A client-side Fabric and NeoForge mod for Minecraft 26.3 that exports item-model texture atlases from inside Minecraft.
 
 ## Features
 
@@ -14,9 +14,9 @@ A client-side Fabric and NeoForge mod for Minecraft 26.2 that exports item-model
 
 ## Getting started
 
-- Minecraft 26.2
+- Minecraft 26.3
 - Java 25 or newer
-- Either Fabric Loader 0.19.3 or newer with Fabric API, or NeoForge 26.2.0.88 or newer.
+- Either Fabric Loader 0.19.5 or newer with Fabric API, or NeoForge 26.3.0.99 or newer.
 - Install on the client only.
 
 Open the generator with the `G` key, through Mod Menu, or with `/atlas`.
