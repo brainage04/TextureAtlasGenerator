@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 
 import java.util.List;
 
-/** Serialises an atlas layout as the JSON, plain-text and CSS mappings written beside the images. */
 final class AtlasMappings {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
@@ -17,10 +16,6 @@ final class AtlasMappings {
     private final List<String> imageFileNames;
     private final JsonObject extra;
 
-    /**
-     * @param imageFileNames the file name of each page's image
-     * @param extra additional top-level JSON properties describing how the atlas was drawn
-     */
     AtlasMappings(AtlasKind kind, List<AtlasCatalog.Entry> entries, AtlasLayout layout, List<String> imageFileNames, JsonObject extra) {
         this.kind = kind;
         this.entries = entries;
@@ -77,10 +72,6 @@ final class AtlasMappings {
         return GSON.toJson(root) + '\n';
     }
 
-    /**
-     * One line per cell, {@code Display Name (key): [column, row]}, followed by
-     * {@code page <n>} (from 1) when the atlas has several pages.
-     */
     String text() {
         boolean paged = layout.pages().size() > 1;
         StringBuilder text = new StringBuilder(entries.size() * 48);
@@ -101,14 +92,7 @@ final class AtlasMappings {
         return text.toString();
     }
 
-    /**
-     * A base class carrying the first page's image and the cell size, plus one class per cell
-     * carrying its offset, and its page's image when that is not the first:
-     * {@code <span class="vanilla_items vanilla_items-minecraft-stone">}. The image and offset are
-     * the {@code --tag-image} and {@code --tag-position} custom properties, and the base class
-     * exposes the icon as {@code --tag-mask}, which the glint overlay stylesheet uses to confine
-     * the glint to the icon.
-     */
+    /** The base class exposes the icon as {@code --tag-mask}, which the glint overlay stylesheet uses to confine the glint to the icon. */
     String css() {
         int pixelSize = layout.pixelSize();
         String base = kind.fileStem();

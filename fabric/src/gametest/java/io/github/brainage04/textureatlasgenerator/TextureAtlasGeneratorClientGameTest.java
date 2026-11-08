@@ -97,7 +97,6 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
             throw new AssertionError("Vanilla mapping does not list every catalog entry");
         }
 
-        // Atlases too large for image viewers are split into square pages of at most 8192 px.
         AtlasLayout paged = AtlasLayout.of(vanillaCatalog.size(), AtlasExporter.MAX_PIXEL_SIZE);
         if (paged.pages().size() < 2 || paged.entryCount() != vanillaCatalog.size()
                 || paged.pages().stream().anyMatch(page -> page.side(AtlasExporter.MAX_PIXEL_SIZE) > AtlasLayout.MAX_PAGE_SIDE)) {
@@ -228,14 +227,12 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         }
     }
 
-    /** Types {@code command} into the chat screen and submits it with Enter, as a player would. */
     private static void runChatCommand(ClientGameTestContext context, String command) {
         context.setScreen(() -> new ChatScreen(command, false));
         context.waitTicks(2);
         context.getInput().pressKey(GLFW.GLFW_KEY_ENTER);
     }
 
-    /** Exports {@code kind} through its chat command and returns the validated JSON mapping. */
     private static JsonObject export(ClientGameTestContext context, AtlasKind kind, int timeoutTicks) {
         String command = "/atlas " + kind.commandName() + " " + PIXEL_SIZE;
         ClientGameTestRecorder.showStep(
@@ -323,7 +320,6 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         }
     }
 
-    /** {@code /atlas glint} writes the whole 82.5 s loop as one animated cell. */
     private static void exportGlint(ClientGameTestContext context) {
         String command = "/atlas glint " + PIXEL_SIZE;
         ClientGameTestRecorder.showStep(context, "texture_atlas.glint.exporting", "Enchantment glint loop",
@@ -347,7 +343,6 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         }
     }
 
-    /** The size and animation of a WebP file, read from its RIFF chunks. */
     private record WebPInfo(int width, int height, boolean animated, int frames, long frameMillis) {
         static WebPInfo read(Path path) throws Exception {
             ByteBuffer data = ByteBuffer.wrap(Files.readAllBytes(path)).order(ByteOrder.LITTLE_ENDIAN);

@@ -8,18 +8,6 @@ import io.github.brainage04.textureatlasgenerator.atlas.AtlasKind;
 import io.github.brainage04.textureatlasgenerator.atlas.GlintExporter;
 import net.minecraft.client.Minecraft;
 
-/**
- * The {@code /atlas} tree, shared by the Fabric and NeoForge client command registrations.
- *
- * <ul>
- *   <li>{@code /atlas} opens the generator.
- *   <li>{@code /atlas <pixels>} exports the vanilla atlas.
- *   <li>{@code /atlas <type> [<pixels>]} exports that atlas, at {@value AtlasExporter#DEFAULT_PIXEL_SIZE}
- *       pixels when no size is given.
- *   <li>{@code /atlas glint [<pixels>]} exports the enchantment glint loop, at
- *       {@value GlintExporter#DEFAULT_PIXEL_SIZE} pixels when no size is given.
- * </ul>
- */
 public final class AtlasCommands {
     private AtlasCommands() {}
 

@@ -26,14 +26,6 @@ import java.util.UUID;
 public final class AtlasCatalog {
     private AtlasCatalog() {}
 
-    /**
-     * One atlas cell.
-     *
-     * @param name unique key: a namespaced item ID (with a component suffix for variants), or a
-     *     SkyBlock item ID
-     * @param displayName in-game item name, or {@code null} where none is known (SkyBlock)
-     * @param cssClass CSS-safe, catalog-unique form of {@code name}
-     */
     public record Entry(
             ItemStack stack,
             String name,
@@ -46,7 +38,6 @@ public final class AtlasCatalog {
             searchText = searchText.toLowerCase(Locale.ROOT);
         }
 
-        /** The name shown in previews: the display name when known, otherwise the key. */
         public String label() {
             return displayName == null ? name : displayName + " (" + name + ")";
         }
@@ -62,11 +53,6 @@ public final class AtlasCatalog {
         return entries;
     }
 
-    /**
-     * Every registered item except air, in registry order. Items carrying potion contents (potions,
-     * splash and lingering potions, tipped arrows) expand in place into their default "uncraftable"
-     * stack followed by one stack per registered potion.
-     */
     private static List<Entry> vanilla() {
         List<Entry> entries = new ArrayList<>(BuiltInRegistries.ITEM.size() + 256);
         for (Item item : BuiltInRegistries.ITEM) {
@@ -121,7 +107,6 @@ public final class AtlasCatalog {
         return new Entry(stack, name, displayName, cssClass(name), name + ' ' + displayName, null);
     }
 
-    /** {@code /give}-compatible item syntax for a potion variant, e.g. {@code minecraft:potion[potion_contents="minecraft:swiftness"]}. */
     private static String potionVariantName(String itemId, Holder<Potion> potion) {
         String potionId = potion.unwrapKey()
                 .orElseThrow(() -> new IllegalStateException("Unregistered potion " + potion))
@@ -130,7 +115,6 @@ public final class AtlasCatalog {
         return itemId + "[potion_contents=\"" + potionId + "\"]";
     }
 
-    /** Replaces every run of characters outside {@code [A-Za-z0-9_-]} with a single hyphen. */
     static String cssClass(String name) {
         String slug = name.replaceAll("[^A-Za-z0-9_-]+", "-").replaceAll("^-+|-+$", "");
         if (slug.isEmpty() || Character.isDigit(slug.charAt(0))) {

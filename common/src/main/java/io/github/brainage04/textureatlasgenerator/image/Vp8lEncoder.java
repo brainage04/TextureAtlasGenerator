@@ -8,10 +8,8 @@ import java.util.List;
 /**
  * Encodes an ARGB image as a WebP lossless (VP8L) bitstream, following RFC 9649.
  *
- * <p>The encoder applies the subtract-green and predictor transforms, then codes the residuals
- * with LZ77 backward references, a colour cache and a single prefix code group. Decisions do not
- * depend on the prefix codes, so the image is scanned twice — once to gather symbol statistics,
- * once to write — without storing the symbol stream.
+ * <p>Decisions do not depend on the prefix codes, so the image is scanned twice, once to gather
+ * symbol statistics and once to write, without storing the symbol stream.
  */
 final class Vp8lEncoder {
     /** libwebp's WEBP_MAX_DIMENSION; the 14-bit header could express 16384. */
@@ -40,7 +38,6 @@ final class Vp8lEncoder {
         8, 0, 4, 7, -4, 7, 7, 4, -7, 4, 8, 1, 8, 2, 6, 6, -6, 6, 8, 3, 5, 7, -5, 7, 7, 5, -7, 5, 8, 4, 6, 7,
         -6, 7, 7, 6, -7, 6, 8, 5, 7, 7, -7, 7, 8, 6, 8, 7
     };
-    /** Plane code (1-based) for offset (xi, yi), indexed by (yi * 17 + xi + 8); 0 when absent. */
     private static final int[] PLANE_CODES = new int[8 * 17];
 
     static {
@@ -51,9 +48,7 @@ final class Vp8lEncoder {
 
     private Vp8lEncoder() {}
 
-    /**
-     * Writes the VP8L header and image data for {@code argb}, which is overwritten with residuals.
-     */
+    /** {@code argb} is overwritten with residuals. */
     static void encode(BitWriter out, int[] argb, int width, int height) throws IOException {
         if (width < 1 || height < 1 || width > MAX_DIMENSION || height > MAX_DIMENSION) {
             throw new IllegalArgumentException("WebP images are limited to " + MAX_DIMENSION + " px per side");
@@ -98,7 +93,6 @@ final class Vp8lEncoder {
         writeImage(out, argb, width, height, true);
     }
 
-    /** Fraction of pixels equal to their left or upper neighbour. */
     static double repeatRatio(int[] argb, int width) {
         long repeats = 0;
         for (int index = 1; index < argb.length; index++) {
@@ -120,7 +114,6 @@ final class Vp8lEncoder {
         }
     }
 
-    /** Picks the predictor per tile with the smallest summed absolute residual. */
     private static int[] chooseModes(int[] argb, int width, int height) {
         int tileSize = 1 << PREDICTOR_BITS;
         int tilesWide = Math.ceilDiv(width, tileSize);
@@ -161,7 +154,7 @@ final class Vp8lEncoder {
         return cost;
     }
 
-    /** Replaces pixels with residuals, last to first so every prediction still sees original pixels. */
+    /** Last to first, so every prediction still sees original pixels. */
     private static void toResiduals(int[] argb, int width, int height, int[] modes, int tilesWide) {
         for (int y = height - 1; y >= 0; y--) {
             for (int x = width - 1; x >= 0; x--) {
@@ -248,11 +241,6 @@ final class Vp8lEncoder {
         return result;
     }
 
-    /**
-     * Writes an entropy-coded image. The main ARGB image uses LZ77, the colour cache and several
-     * prefix code groups chosen per tile; transform sub-images are small and coded as literals
-     * with one group.
-     */
     private static void writeImage(BitWriter out, int[] pixels, int width, int height, boolean main) throws IOException {
         int cacheBits = main ? CACHE_BITS : 0;
         if (cacheBits > 0) {
@@ -378,7 +366,6 @@ final class Vp8lEncoder {
         return (y >> tileBits) * tilesWide + (x >> tileBits);
     }
 
-    /** Tile size for prefix code groups: about 4,000 tiles, between 8 and 512 px. */
     private static int tileBits(int width, int height) {
         int bits = 3;
         while (bits < 9 && (long) Math.ceilDiv(width, 1 << bits) * Math.ceilDiv(height, 1 << bits) > 4096) {
@@ -387,7 +374,6 @@ final class Vp8lEncoder {
         return bits;
     }
 
-    /** The five alphabets of a prefix code group, concatenated into one histogram array. */
     private record Layout(int green, int red, int blue, int alpha, int distance, int size) {
         Layout(int greenSize) {
             this(0, greenSize, greenSize + 256, greenSize + 512, greenSize + 768, greenSize + 768 + NUM_DISTANCE_CODES);
@@ -416,19 +402,13 @@ final class Vp8lEncoder {
         return List.of(tileHistograms[0] != null ? tileHistograms[0] : new int[layout.size]);
     }
 
-    /** Estimated cost of describing one used symbol in a prefix code's length table. */
     private static final double SYMBOL_HEADER_BITS = 4.0;
-    /** Estimated fixed cost of a prefix code group's five length tables. */
     private static final double GROUP_HEADER_BITS = 5 * 40.0;
     private static final int MAX_GROUPS = 256;
 
-    /**
-     * Assigns every tile to a prefix code group, greedily joining the group whose estimated size
-     * (entropy plus code description) grows least, or opening a new group when that is cheaper.
-     */
     private static List<int[]> cluster(int[][] tileHistograms, Layout layout, int[] tileGroup) {
         List<int[]> groups = new ArrayList<>();
-        List<double[]> stats = new ArrayList<>(); // per part: total, sum c log2 c, used symbols
+        List<double[]> stats = new ArrayList<>();
         int[] nonZero = new int[layout.size];
         for (int tile = 0; tile < tileHistograms.length; tile++) {
             int[] histogram = tileHistograms[tile];
@@ -565,7 +545,6 @@ final class Vp8lEncoder {
         void copy(int position, int length, int distanceCode);
     }
 
-    /** Deterministic greedy LZ77 parse with a hash chain and a colour cache. */
     private static void tokenize(int[] pixels, int width, boolean lz77, int cacheBits, TokenSink sink) {
         int size = pixels.length;
         int[] cache = cacheBits > 0 ? new int[1 << cacheBits] : null;
@@ -583,7 +562,6 @@ final class Vp8lEncoder {
             int bestDistance = 0;
             if (lz77 && position + MIN_MATCH <= size) {
                 int maxLength = Math.min(MAX_MATCH, size - position);
-                // Cheap, very common candidates first: the previous pixel and the one above.
                 if (position >= 1) {
                     bestLength = matchLength(pixels, position, position - 1, maxLength);
                     bestDistance = 1;
@@ -656,7 +634,6 @@ final class Vp8lEncoder {
         return length;
     }
 
-    /** Maps a scan-line distance to its distance code, preferring the short 2D neighbourhood codes. */
     private static int distanceCode(int distance, int width) {
         int yOffset = distance / width;
         int xOffset = distance - yOffset * width;

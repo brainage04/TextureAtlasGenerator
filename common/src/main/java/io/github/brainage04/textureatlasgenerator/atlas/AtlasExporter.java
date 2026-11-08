@@ -21,10 +21,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Renders an atlas — one square image, or several square pages when it would exceed
- * {@link AtlasLayout#MAX_PAGE_SIDE} — in horizontal bands and writes each page as lossless WebP
- * (or a streamed PNG when the heap cannot hold one), so neither an image nor a GPU render target
- * has to be huge.
+ * Renders in horizontal bands and splits a large atlas into square pages of at most
+ * {@link AtlasLayout#MAX_PAGE_SIDE}, writing a streamed PNG when the heap cannot hold a WebP page,
+ * so neither an image nor a GPU render target has to be huge.
  */
 public final class AtlasExporter {
     public static final int MIN_PIXEL_SIZE = 1;
@@ -42,7 +41,6 @@ public final class AtlasExporter {
     private final AtlasItemRenderer renderer;
     private final List<AtlasCatalog.Entry> entries;
     private final AtlasLayout layout;
-    /** Cell size drawn on the GPU; a multiple of {@link #pixelSize}. */
     private final int renderSize;
     private final PlayerHeadSkins skins;
     private final Path outputDirectory;
@@ -51,7 +49,6 @@ public final class AtlasExporter {
     private final List<ItemStack> stacks;
     private final List<Path> temporaryImages = new ArrayList<>();
 
-    /** The page being rendered and its band and tile geometry. */
     private int pageIndex;
     private AtlasLayout.Page page;
     private int side;
@@ -80,16 +77,10 @@ public final class AtlasExporter {
         this.stacks = entries.stream().map(AtlasCatalog.Entry::stack).toList();
     }
 
-    /** {@code <stem>_<size>x<size>}, the name shared by the images and their mappings. */
     public static String fileBase(AtlasKind kind, int pixelSize) {
         return kind.fileStem() + '_' + pixelSize + 'x' + pixelSize;
     }
 
-    /**
-     * Starts an export on the render thread. Returns {@code false} if another export is running.
-     *
-     * @throws IllegalArgumentException if {@code pixelSize} is out of range
-     */
     public static boolean start(Minecraft client, AtlasKind kind, int pixelSize, Listener listener) {
         if (pixelSize < MIN_PIXEL_SIZE || pixelSize > MAX_PIXEL_SIZE) {
             throw new IllegalArgumentException(
@@ -116,7 +107,6 @@ public final class AtlasExporter {
         return EXPORTING.get();
     }
 
-    /** Claims the single export slot for another exporter; see {@link #release()}. */
     static boolean claim() {
         return EXPORTING.compareAndSet(false, true);
     }
@@ -150,7 +140,6 @@ public final class AtlasExporter {
         })));
     }
 
-    /** Removes images of an earlier export at this size whose format or page count differed. */
     private void deleteStaleImages(List<String> current) throws IOException {
         Pattern ours = Pattern.compile(Pattern.quote(fileBase) + "(_\\d+)?\\.(" + Arrays.stream(AtlasImage.Format.values())
                 .map(AtlasImage.Format::extension).reduce((a, b) -> a + '|' + b).orElseThrow() + ")");
@@ -182,7 +171,6 @@ public final class AtlasExporter {
         renderNextTile();
     }
 
-    /** Renders the tile at ({@link #bandIndex}, {@link #tileColumn}), or skips it when it is empty. */
     private void renderNextTile() {
         int columns = page.columns();
         int firstRow = bandIndex * bandRows;
@@ -327,7 +315,6 @@ public final class AtlasExporter {
         }
     }
 
-    /** Runs a step on the render thread, turning any exception into a failed export. */
     private void run(Step step) {
         if (finished) {
             return;
@@ -347,7 +334,6 @@ public final class AtlasExporter {
         finish(null, error);
     }
 
-    /** Reports the outcome once. */
     private void finish(Result result, Throwable error) {
         if (finished) {
             return;
@@ -391,12 +377,6 @@ public final class AtlasExporter {
         }
     }
 
-    /**
-     * @param summary what was exported, e.g. {@code 1720 items (2688x2688 px)}
-     * @param images the written images, in page order
-     * @param mappings the written mapping files
-     * @param directory the folder holding them
-     */
     public record Result(String summary, List<Path> images, List<Path> mappings, Path directory) {}
 
     public interface Listener {

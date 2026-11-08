@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-/** Renders a grid of item stacks off-screen and reads the pixels back. */
 final class AtlasItemRenderer {
     private final Minecraft client;
 
@@ -43,14 +42,6 @@ final class AtlasItemRenderer {
         return 16 / a * pixelSize;
     }
 
-    /**
-     * Copies a bottom-up RGBA page into a top-down buffer, averaging each {@code factor × factor}
-     * block (weighted by alpha) when the page was drawn larger than its cells.
-     *
-     * @param destination receives {@code width / factor × height / factor} pixels
-     * @param destinationRowBytes bytes per row of {@code destination}
-     * @param destinationOffset byte offset of the page's top-left pixel in {@code destination}
-     */
     static void downsample(
             ByteBuffer pixels, int width, int height, int factor, byte[] destination, int destinationRowBytes, int destinationOffset) {
         int pageRowBytes = width * 4;
@@ -94,7 +85,7 @@ final class AtlasItemRenderer {
         }
     }
 
-    /** Receives a rendered page; the buffer is only valid during the call. */
+    /** The buffer is only valid during the call. */
     interface PageConsumer {
         /**
          * @param rgba tightly packed RGBA8 pixels, bottom row first
@@ -103,10 +94,6 @@ final class AtlasItemRenderer {
         void accept(ByteBuffer rgba, int width, int height, Throwable error);
     }
 
-    /**
-     * Renders {@code stacks} (row-major, {@code null} for an empty cell) into a page of
-     * {@code columns} x {@code rows} cells of {@code pixelSize} pixels. Must run on the render thread.
-     */
     void renderPage(
             List<ItemStack> stacks,
             int columns,

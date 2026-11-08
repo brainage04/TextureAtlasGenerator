@@ -27,14 +27,11 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
- * Loads player-head skins through {@link PlayerSkinRenderCache}, the cache the item renderer
- * reads, and refuses to render a head that is not showing its own downloaded skin.
- *
- * <p>Warming {@code SkinManager} alone is not enough: its entries expire 15 seconds after last
+ * Warming {@code SkinManager} alone is not enough: its entries expire 15 seconds after last
  * access, and the head renderer resolves skins through {@code PlayerSkinRenderCache}, which asks
  * {@code SkinManager} again. A head whose skin finished loading more than 15 seconds before its
  * page was drawn therefore started a fresh asynchronous load and was drawn with a default skin,
- * without any error. Exports are now checked immediately before each page is rendered.
+ * without any error.
  */
 final class PlayerHeadSkins {
     private static final int MAX_CONCURRENT_LOADS = 8;
@@ -57,22 +54,12 @@ final class PlayerHeadSkins {
         this.entries = entries;
     }
 
-    /**
-     * Resolves every skin. Completes exceptionally with a {@link SkinLoadException} naming the
-     * failed entries if any skin cannot be loaded. Must be called on the render thread.
-     *
-     * @param progress receives the number of completed loads, on the render thread
-     */
     CompletableFuture<Void> preload(IntConsumer progress) {
         this.progress = progress;
         startMore();
         return loaded;
     }
 
-    /**
-     * Runs {@code render} once every head in {@code page} is resolved in the render cache,
-     * reloading any that expired since {@link #preload}. Must be called on the render thread.
-     */
     void whenReady(List<AtlasCatalog.Entry> page, Runnable render, Consumer<Throwable> failure) {
         List<CompletableFuture<Optional<PlayerSkinRenderCache.RenderInfo>>> pending = new ArrayList<>();
         for (AtlasCatalog.Entry entry : page) {
@@ -156,7 +143,7 @@ final class PlayerHeadSkins {
         return null;
     }
 
-    /** Fails the preload, first re-requesting one failed skin URL so the HTTP result is in the message. */
+    /** Re-requests one failed skin URL so the HTTP result is in the message. */
     private void reportFailures() {
         AtlasCatalog.Entry probe = firstFailure;
         CompletableFuture.supplyAsync(() -> probe(probe.profile(), client.getProxy()), Util.ioPool()).whenComplete((result, error) ->
@@ -211,7 +198,6 @@ final class PlayerHeadSkins {
         return entry.stack().get(DataComponents.PROFILE);
     }
 
-    /** A player-head skin could not be resolved; the export is abandoned rather than drawn with a default skin. */
     static final class SkinLoadException extends RuntimeException {
         SkinLoadException(String message) {
             super(message);

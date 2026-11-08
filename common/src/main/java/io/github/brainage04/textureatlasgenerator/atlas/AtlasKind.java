@@ -24,12 +24,10 @@ public enum AtlasKind {
         return fileStem;
     }
 
-    /** The literal used by {@code /atlas <type>}. */
     public String commandName() {
         return commandName;
     }
 
-    /** Whether every entry is a player head whose skin must be downloaded before rendering. */
     public boolean usesPlayerHeads() {
         return this == SKYBLOCK_ALL || this == SKYBLOCK_BAZAAR;
     }

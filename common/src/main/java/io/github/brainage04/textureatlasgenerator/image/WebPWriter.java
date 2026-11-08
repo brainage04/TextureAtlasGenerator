@@ -12,14 +12,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-/** Lossless WebP files: a single image, or an animation built frame by frame. */
 public final class WebPWriter {
-    /** Largest width or height a WebP image may have. */
     public static final int MAX_DIMENSION = Vp8lEncoder.MAX_DIMENSION;
 
     private WebPWriter() {}
 
-    /** Writes {@code argb} (row-major, 0xAARRGGBB; overwritten) as a lossless WebP. */
+    /** {@code argb} is overwritten. */
     public static void writeStill(Path path, int[] argb, int width, int height) throws IOException {
         try (FileChannel channel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
             OutputStream out = new BufferedOutputStream(Channels.newOutputStream(channel), 1 << 16);
@@ -45,7 +43,6 @@ public final class WebPWriter {
         }
     }
 
-    /** An animated lossless WebP whose frames all cover the whole canvas and replace it. */
     public static final class Animation implements AutoCloseable {
         private final FileChannel channel;
         private final OutputStream out;
@@ -54,9 +51,6 @@ public final class WebPWriter {
         private long riffPayload = 4;
         private boolean closed;
 
-        /**
-         * @param loopCount number of plays, or 0 to loop forever
-         */
         public Animation(Path path, int width, int height, int loopCount) throws IOException {
             if (width < 1 || height < 1 || width > MAX_DIMENSION || height > MAX_DIMENSION) {
                 throw new IllegalArgumentException("WebP images are limited to " + MAX_DIMENSION + " px per side");
@@ -82,7 +76,7 @@ public final class WebPWriter {
             chunk("ANIM", anim.array());
         }
 
-        /** Appends a frame; {@code argb} is overwritten. */
+        /** {@code argb} is overwritten. */
         public void addFrame(int[] argb, int durationMillis) throws IOException {
             ByteArrayOutputStream frame = new ByteArrayOutputStream(argb.length);
             BitWriter bits = new BitWriter(frame);

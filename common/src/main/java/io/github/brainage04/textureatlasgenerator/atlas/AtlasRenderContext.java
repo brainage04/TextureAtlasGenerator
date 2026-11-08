@@ -12,7 +12,6 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Selects a canonical animation frame without advancing or resetting the client's own animations. */
 final class AtlasRenderContext implements AutoCloseable {
     private final List<TextureAtlas> atlases = new ArrayList<>();
     private final List<AnimationSnapshot> animations = new ArrayList<>();

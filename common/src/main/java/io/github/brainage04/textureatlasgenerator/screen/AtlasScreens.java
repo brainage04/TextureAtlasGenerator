@@ -6,16 +6,9 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-/** Opens the generator from a chat command. */
 public final class AtlasScreens {
     private AtlasScreens() {}
 
-    /**
-     * Opens the generator screen, exporting {@code kind} at {@code pixelSize} straight away when
-     * {@code kind} is not {@code null}.
-     *
-     * @return {@code 1}, the Brigadier success count
-     */
     public static int open(Minecraft client, @Nullable AtlasKind kind, int pixelSize) {
         return openLater(client, screen -> {
             if (kind != null) {
@@ -25,7 +18,6 @@ public final class AtlasScreens {
         });
     }
 
-    /** Opens the generator screen and exports the enchantment glint loop at {@code pixelSize}. */
     public static int openGlint(Minecraft client, int pixelSize) {
         return openLater(client, screen -> screen.startGlintExportOnOpen(pixelSize));
     }

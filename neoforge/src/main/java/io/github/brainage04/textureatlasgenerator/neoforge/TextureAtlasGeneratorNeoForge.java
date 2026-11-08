@@ -29,7 +29,6 @@ public final class TextureAtlasGeneratorNeoForge {
     );
 
     public TextureAtlasGeneratorNeoForge(IEventBus modBus, ModContainer container) {
-        // The mods list opens the atlas tool, as Mod Menu does on Fabric.
         container.registerExtensionPoint(IConfigScreenFactory.class, (modContainer, parent) -> new TextureAtlasScreen(parent));
         modBus.addListener(this::registerKeyMappings);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
@@ -49,7 +48,6 @@ public final class TextureAtlasGeneratorNeoForge {
         }
     }
 
-    /** Registers the {@code /atlas} client command; see {@link AtlasCommands}. */
     private void registerCommands(RegisterClientCommandsEvent event) {
         event.getDispatcher().register(AtlasCommands.<CommandSourceStack>create());
     }
