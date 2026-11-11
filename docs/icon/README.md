@@ -1,14 +1,14 @@
 # TextureAtlasGenerator icon
 
-## What this is
+## Overview
 
-`docs/icon/icon.png` — the mod's icon: 1024x1024 PNG, 8-bit RGBA, non-interlaced,
+`docs/icon/icon.png` is the mod's icon: a 1024x1024 PNG, 8-bit RGBA, non-interlaced,
 148,764 bytes, sha256
 `07d54e88ff01ebf37e0a15da57e811de26c00aa87341fdcef2607fc3b5b6e838`.
 
 ## How it was made
 
-Deterministic Pillow **12.3.0** export composition — no rendering, no ML, no retouching:
+Deterministic Pillow **12.3.0** export composition, with no rendering, no ML and no retouching:
 `provenance/compose.py` crops sixteen **native 256x256 RGBA cells** out of a real
 TextureAtlasGenerator export (8192x12288, 1536 mapped items, 256 px per item) and pastes
 them unmasked into a 4x4 grid at exactly 1:1. No resizing, recolouring, alpha blending,
@@ -16,10 +16,10 @@ borders or gutters. Every saved icon cell is decoded-RGBA byte-identical to its 
 rectangle (16 cells, 4,194,304 bytes compared, 0 differing bytes, max channel difference 0;
 two runs produced the identical file hash).
 
-How the atlas itself was produced (real, not synthetic): the **TextureAtlasGenerator** mod
-at commit `51ce360` exported it from a **real Minecraft 26.2 client** run
+How the atlas itself was produced from a real client run: the **TextureAtlasGenerator** mod
+at commit `51ce360` exported it from a **Minecraft 26.2 client** run
 (`AtlasExporter.start`, 256 px per item, live dedicated server, Mesa llvmpipe OpenGL), and
-the export is GUI-scale/window independent — the 64 px export hashes identically at
+the export is GUI-scale/window independent: the 64 px export hashes identically at
 854x480/gui1, 1280x720/gui2 and 1920x1080/gui3. The raw 256 px export used here has sha256
 `c9baa75bac9a498b4d3a5be106ca75163e4d3e33aaa599618f7aba4485cdd681`; the same file
 survives in the round-3 tree at
@@ -29,8 +29,8 @@ Cell order (4x4, left to right, top to bottom), as listed in `BLOCKS` in `compos
 grass block, dirt, stone, cobblestone, oak planks, oak log, oak leaves, glass, sand, gravel,
 bricks, bookshelf, crafting table, furnace, chest, obsidian.
 
-There is no Minecraft capture and no shader pack involved in this file: it is a 1:1 export of
-an atlas that in turn came from real client-side item rendering.
+This file is a 1:1 export of an atlas that in turn came from real client-side item rendering;
+no Minecraft capture and no shader pack is involved.
 
 ## Provenance files
 
@@ -57,7 +57,7 @@ python3 compose.py
 ```
 
 `compose.py` needs `raw-export/vanilla_items_256x256.png`, which is **not shipped here**
-(13.4 MB — over the 5 MB single-file limit for this provenance copy). Restore it first, from
+(13.4 MB, over the 5 MB single-file limit for this provenance copy). Restore it first, from
 either source:
 
 ```
