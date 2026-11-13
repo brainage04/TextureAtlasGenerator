@@ -7,7 +7,8 @@
 	"authors": ["brainage04"],
 	"contact": {
 		"homepage": "https://github.com/brainage04/TextureAtlasGenerator",
-		"sources": "https://github.com/brainage04/TextureAtlasGenerator"
+		"sources": "https://github.com/brainage04/TextureAtlasGenerator",
+		"issues": "https://github.com/brainage04/TextureAtlasGenerator/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/textureatlasgenerator/icon.png",
