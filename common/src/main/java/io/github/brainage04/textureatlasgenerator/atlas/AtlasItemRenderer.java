@@ -6,15 +6,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.renderpearl.api.commands.CommandEncoder;
+import java.nio.ByteBuffer;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.renderer.state.WindowRenderState;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.world.item.ItemStack;
-
-import java.nio.ByteBuffer;
-import java.util.List;
 
 final class AtlasItemRenderer {
     private final Minecraft client;
@@ -43,11 +42,21 @@ final class AtlasItemRenderer {
     }
 
     static void downsample(
-            ByteBuffer pixels, int width, int height, int factor, byte[] destination, int destinationRowBytes, int destinationOffset) {
+            ByteBuffer pixels,
+            int width,
+            int height,
+            int factor,
+            byte[] destination,
+            int destinationRowBytes,
+            int destinationOffset) {
         int pageRowBytes = width * 4;
         if (factor == 1) {
             for (int y = 0; y < height; y++) {
-                pixels.get((height - 1 - y) * pageRowBytes, destination, destinationOffset + y * destinationRowBytes, pageRowBytes);
+                pixels.get(
+                        (height - 1 - y) * pageRowBytes,
+                        destination,
+                        destinationOffset + y * destinationRowBytes,
+                        pageRowBytes);
             }
             return;
         }
@@ -59,7 +68,8 @@ final class AtlasItemRenderer {
                 long blue = 0;
                 long alpha = 0;
                 for (int dy = 0; dy < factor; dy++) {
-                    int rowStart = (height - 1 - (outY * factor + dy)) * pageRowBytes + outX * factor * 4;
+                    int rowStart =
+                            (height - 1 - (outY * factor + dy)) * pageRowBytes + outX * factor * 4;
                     for (int dx = 0; dx < factor; dx++) {
                         int at = rowStart + dx * 4;
                         int a = pixels.get(at + 3) & 0xFF;
@@ -95,11 +105,7 @@ final class AtlasItemRenderer {
     }
 
     void renderPage(
-            List<ItemStack> stacks,
-            int columns,
-            int rows,
-            int pixelSize,
-            PageConsumer consumer) {
+            List<ItemStack> stacks, int columns, int rows, int pixelSize, PageConsumer consumer) {
         int width = columns * pixelSize;
         int height = rows * pixelSize;
         MainTarget target = null;
@@ -117,25 +123,25 @@ final class AtlasItemRenderer {
     }
 
     private void renderItems(
-            RenderTarget target,
-            List<ItemStack> stacks,
-            int columns,
-            int pixelSize) {
+            RenderTarget target, List<ItemStack> stacks, int columns, int pixelSize) {
         GuiRenderState renderState = new GuiRenderState();
-        GuiRenderer renderer = new GuiRenderer(renderState, client.gameRenderer.featureRenderDispatcher(), List.of());
+        GuiRenderer renderer =
+                new GuiRenderer(
+                        renderState, client.gameRenderer.featureRenderDispatcher(), List.of());
         int renderScale = Math.max(1, Math.ceilDiv(pixelSize, 16));
         // The extractor's initial scissor comes from these methods, not WindowRenderState.
-        GuiGraphicsExtractor graphics = new GuiGraphicsExtractor(client, renderState, 0, 0) {
-            @Override
-            public int guiWidth() {
-                return Math.ceilDiv(target.width, renderScale);
-            }
+        GuiGraphicsExtractor graphics =
+                new GuiGraphicsExtractor(client, renderState, 0, 0) {
+                    @Override
+                    public int guiWidth() {
+                        return Math.ceilDiv(target.width, renderScale);
+                    }
 
-            @Override
-            public int guiHeight() {
-                return Math.ceilDiv(target.height, renderScale);
-            }
-        };
+                    @Override
+                    public int guiHeight() {
+                        return Math.ceilDiv(target.height, renderScale);
+                    }
+                };
         float itemScale = pixelSize / (16.0F * renderScale);
         graphics.pose().pushMatrix();
         graphics.pose().scale(itemScale, itemScale);
@@ -174,25 +180,26 @@ final class AtlasItemRenderer {
                 target.getColorTexture(),
                 GuiRenderer.CLEAR_COLOR,
                 target.getDepthTexture(),
-                RenderSystem.DEFAULT_DEPTH_CLEAR_VALUE
-        );
+                RenderSystem.DEFAULT_DEPTH_CLEAR_VALUE);
     }
 
     private void capture(RenderTarget target, PageConsumer consumer) {
-        GpuBuffer buffer = RenderSystem.getDevice().createBuffer(
-                () -> "Texture Atlas Generator readback",
-                GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_MAP_READ,
-                (long) target.width * target.height * 4
-        );
+        GpuBuffer buffer =
+                RenderSystem.getDevice()
+                        .createBuffer(
+                                () -> "Texture Atlas Generator readback",
+                                GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_MAP_READ,
+                                (long) target.width * target.height * 4);
 
         try {
-            RenderSystem.getDevice().createCommandEncoder().copyTextureToBuffer(
-                    target.getColorTexture(),
-                    buffer,
-                    0,
-                    () -> finishCapture(target, buffer, consumer),
-                    0
-            );
+            RenderSystem.getDevice()
+                    .createCommandEncoder()
+                    .copyTextureToBuffer(
+                            target.getColorTexture(),
+                            buffer,
+                            0,
+                            () -> finishCapture(target, buffer, consumer),
+                            0);
         } catch (Throwable error) {
             buffer.close();
             target.destroyBuffers();
@@ -200,7 +207,8 @@ final class AtlasItemRenderer {
         }
     }
 
-    private static void finishCapture(RenderTarget target, GpuBuffer buffer, PageConsumer consumer) {
+    private static void finishCapture(
+            RenderTarget target, GpuBuffer buffer, PageConsumer consumer) {
         int width = target.width;
         int height = target.height;
         boolean delivered = false;

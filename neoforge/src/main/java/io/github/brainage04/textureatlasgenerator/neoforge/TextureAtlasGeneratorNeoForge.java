@@ -1,12 +1,12 @@
 package io.github.brainage04.textureatlasgenerator.neoforge;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.brainage04.textureatlasgenerator.TextureAtlasGenerator;
 import io.github.brainage04.textureatlasgenerator.screen.AtlasCommands;
 import io.github.brainage04.textureatlasgenerator.screen.TextureAtlasScreen;
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -20,15 +20,20 @@ import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = TextureAtlasGenerator.MOD_ID, dist = Dist.CLIENT)
 public final class TextureAtlasGeneratorNeoForge {
-    private static final KeyMapping.Category CATEGORY = new KeyMapping.Category(
-            Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "general")
-    );
-    private static final KeyMapping OPEN_ATLAS_SCREEN = new KeyMapping(
-            "key.textureatlasgenerator.open_screen", InputConstants.Type.KEYBOARD, InputConstants.KEY_G, CATEGORY
-    );
+    private static final KeyMapping.Category CATEGORY =
+            new KeyMapping.Category(
+                    Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "general"));
+    private static final KeyMapping OPEN_ATLAS_SCREEN =
+            new KeyMapping(
+                    "key.textureatlasgenerator.open_screen",
+                    InputConstants.Type.KEYBOARD,
+                    InputConstants.KEY_G,
+                    CATEGORY);
 
     public TextureAtlasGeneratorNeoForge(IEventBus modBus, ModContainer container) {
-        container.registerExtensionPoint(IConfigScreenFactory.class, (modContainer, parent) -> new TextureAtlasScreen(parent));
+        container.registerExtensionPoint(
+                IConfigScreenFactory.class,
+                (modContainer, parent) -> new TextureAtlasScreen(parent));
         modBus.addListener(this::registerKeyMappings);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onClientTick);

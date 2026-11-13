@@ -2,20 +2,20 @@ package io.github.brainage04.textureatlasgenerator.atlas;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.brainage04.textureatlasgenerator.TextureAtlasGenerator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public final class AtlasPreview implements AutoCloseable {
-    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "atlas_preview");
+    private static final Identifier TEXTURE =
+            Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "atlas_preview");
     private static final int MAX_TILE_SIZE = 4096;
 
     private final Minecraft client;
@@ -47,7 +47,8 @@ public final class AtlasPreview implements AutoCloseable {
         this.renderer = new AtlasItemRenderer(client);
     }
 
-    public void configure(AtlasKind newKind, List<AtlasCatalog.Entry> newEntries, int newPixelSize) {
+    public void configure(
+            AtlasKind newKind, List<AtlasCatalog.Entry> newEntries, int newPixelSize) {
         boolean itemsChanged = newKind != kind || newEntries != entries;
         pixelSize = newPixelSize;
         failed = false;
@@ -96,8 +97,16 @@ public final class AtlasPreview implements AutoCloseable {
         float scale = 1.0F / textureSide;
         int left = slot % slotColumns * renderedPixels;
         int top = slot / slotColumns * renderedPixels;
-        graphics.blit(TEXTURE, x, y, x + size, y + size,
-                left * scale, (left + renderedPixels) * scale, top * scale, (top + renderedPixels) * scale);
+        graphics.blit(
+                TEXTURE,
+                x,
+                y,
+                x + size,
+                y + size,
+                left * scale,
+                (left + renderedPixels) * scale,
+                top * scale,
+                (top + renderedPixels) * scale);
         return true;
     }
 
@@ -115,7 +124,15 @@ public final class AtlasPreview implements AutoCloseable {
         renderTile(indices, 0, tileColumns, renderSize, cellPixels, columns, pixels, requested);
     }
 
-    private void renderTile(int[] indices, int first, int tileColumns, int renderSize, int cellPixels, int columns, byte[] pixels, int requested) {
+    private void renderTile(
+            int[] indices,
+            int first,
+            int tileColumns,
+            int renderSize,
+            int cellPixels,
+            int columns,
+            byte[] pixels,
+            int requested) {
         if (closed || requested != generation) {
             rendering = false;
             return;
@@ -138,27 +155,56 @@ public final class AtlasPreview implements AutoCloseable {
                 tileStacks.add(null);
             }
         }
-        Runnable draw = () -> renderer.renderPage(tileStacks, tileWidth, tileRows, renderSize, (rgba, width, height, error) -> {
-            if (error != null) {
-                fail(error, requested);
-                return;
-            }
-            int tileRowBytes = tileWidth * cellPixels * 4;
-            byte[] tile = new byte[tileRowBytes * tileRows * cellPixels];
-            AtlasItemRenderer.downsample(rgba, width, height, renderSize / cellPixels, tile, tileRowBytes, 0);
-            int rowBytes = columns * cellPixels * 4;
-            for (int cell = 0; cell < count; cell++) {
-                int sourceX = cell % tileWidth * cellPixels * 4;
-                int sourceY = cell / tileWidth * cellPixels;
-                int slot = first + cell;
-                int targetX = slot % columns * cellPixels * 4;
-                int targetY = slot / columns * cellPixels;
-                for (int y = 0; y < cellPixels; y++) {
-                    System.arraycopy(tile, (sourceY + y) * tileRowBytes + sourceX, pixels, (targetY + y) * rowBytes + targetX, cellPixels * 4);
-                }
-            }
-            client.schedule(() -> renderTile(indices, first + count, tileColumns, renderSize, cellPixels, columns, pixels, requested));
-        });
+        Runnable draw =
+                () ->
+                        renderer.renderPage(
+                                tileStacks,
+                                tileWidth,
+                                tileRows,
+                                renderSize,
+                                (rgba, width, height, error) -> {
+                                    if (error != null) {
+                                        fail(error, requested);
+                                        return;
+                                    }
+                                    int tileRowBytes = tileWidth * cellPixels * 4;
+                                    byte[] tile = new byte[tileRowBytes * tileRows * cellPixels];
+                                    AtlasItemRenderer.downsample(
+                                            rgba,
+                                            width,
+                                            height,
+                                            renderSize / cellPixels,
+                                            tile,
+                                            tileRowBytes,
+                                            0);
+                                    int rowBytes = columns * cellPixels * 4;
+                                    for (int cell = 0; cell < count; cell++) {
+                                        int sourceX = cell % tileWidth * cellPixels * 4;
+                                        int sourceY = cell / tileWidth * cellPixels;
+                                        int slot = first + cell;
+                                        int targetX = slot % columns * cellPixels * 4;
+                                        int targetY = slot / columns * cellPixels;
+                                        for (int y = 0; y < cellPixels; y++) {
+                                            System.arraycopy(
+                                                    tile,
+                                                    (sourceY + y) * tileRowBytes + sourceX,
+                                                    pixels,
+                                                    (targetY + y) * rowBytes + targetX,
+                                                    cellPixels * 4);
+                                        }
+                                    }
+                                    client.schedule(
+                                            () ->
+                                                    renderTile(
+                                                            indices,
+                                                            first + count,
+                                                            tileColumns,
+                                                            renderSize,
+                                                            cellPixels,
+                                                            columns,
+                                                            pixels,
+                                                            requested));
+                                });
         if (skins != null) {
             skins.whenReady(tileEntries, draw, error -> fail(error, requested));
         } else {
@@ -181,7 +227,13 @@ public final class AtlasPreview implements AutoCloseable {
         NativeImage image = new NativeImage(side, side, false);
         for (int y = 0, at = 0; y < side; y++) {
             for (int x = 0; x < side; x++, at += 4) {
-                image.setPixel(x, y, (rgba[at + 3] & 0xFF) << 24 | (rgba[at] & 0xFF) << 16 | (rgba[at + 1] & 0xFF) << 8 | (rgba[at + 2] & 0xFF));
+                image.setPixel(
+                        x,
+                        y,
+                        (rgba[at + 3] & 0xFF) << 24
+                                | (rgba[at] & 0xFF) << 16
+                                | (rgba[at + 1] & 0xFF) << 8
+                                | (rgba[at + 2] & 0xFF));
             }
         }
         if (texture != null && textureSide == side) {
@@ -202,7 +254,11 @@ public final class AtlasPreview implements AutoCloseable {
     }
 
     private static String message(Throwable error) {
-        Throwable cause = error instanceof java.util.concurrent.CompletionException && error.getCause() != null ? error.getCause() : error;
+        Throwable cause =
+                error instanceof java.util.concurrent.CompletionException
+                                && error.getCause() != null
+                        ? error.getCause()
+                        : error;
         return cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage();
     }
 

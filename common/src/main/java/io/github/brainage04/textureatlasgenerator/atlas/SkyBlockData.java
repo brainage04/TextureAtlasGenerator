@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,17 +42,21 @@ public final class SkyBlockData {
             }
             try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                 JsonElement parsed = JsonParser.parseReader(reader);
-                if (!parsed.isJsonObject()) throw new IllegalStateException("SkyBlock data root must be an object");
+                if (!parsed.isJsonObject())
+                    throw new IllegalStateException("SkyBlock data root must be an object");
                 root = parsed.getAsJsonObject();
             }
         } catch (IOException | RuntimeException e) {
-            if (e instanceof IllegalStateException) throw (IllegalStateException)e;
-            throw new IllegalStateException("Unable to load SkyBlock data resource: " + RESOURCE, e);
+            if (e instanceof IllegalStateException) throw (IllegalStateException) e;
+            throw new IllegalStateException(
+                    "Unable to load SkyBlock data resource: " + RESOURCE, e);
         }
         JsonElement allElement = root.get("all");
         JsonElement bazaarElement = root.get("bazaar");
-        if (allElement == null || !allElement.isJsonArray()) throw new IllegalStateException("SkyBlock data field 'all' must be an array");
-        if (bazaarElement == null || !bazaarElement.isJsonArray()) throw new IllegalStateException("SkyBlock data field 'bazaar' must be an array");
+        if (allElement == null || !allElement.isJsonArray())
+            throw new IllegalStateException("SkyBlock data field 'all' must be an array");
+        if (bazaarElement == null || !bazaarElement.isJsonArray())
+            throw new IllegalStateException("SkyBlock data field 'bazaar' must be an array");
         List<Entry> all = parseAll(allElement.getAsJsonArray());
         List<Entry> bazaar = parseBazaar(bazaarElement.getAsJsonArray(), all);
         return new Loaded(List.copyOf(all), List.copyOf(bazaar));
@@ -64,11 +67,14 @@ public final class SkyBlockData {
         Set<String> names = new HashSet<>();
         for (int i = 0; i < array.size(); i++) {
             JsonElement element = array.get(i);
-            if (!element.isJsonObject()) throw new IllegalStateException("Malformed SkyBlock 'all' entry at index " + i + ": expected object");
+            if (!element.isJsonObject())
+                throw new IllegalStateException(
+                        "Malformed SkyBlock 'all' entry at index " + i + ": expected object");
             JsonObject object = element.getAsJsonObject();
             String name = requiredString(object, "name", "all", i);
             String skin = requiredString(object, "skinValue", "all", i);
-            if (!names.add(name)) throw new IllegalStateException("Duplicate SkyBlock name in 'all': " + name);
+            if (!names.add(name))
+                throw new IllegalStateException("Duplicate SkyBlock name in 'all': " + name);
             result.add(new Entry(name, skin));
         }
         return result;
@@ -80,18 +86,36 @@ public final class SkyBlockData {
         List<Entry> result = new ArrayList<>(array.size());
         for (int i = 0; i < array.size(); i++) {
             JsonElement element = array.get(i);
-            if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) throw new IllegalStateException("Malformed SkyBlock 'bazaar' entry at index " + i + ": expected name string");
+            if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString())
+                throw new IllegalStateException(
+                        "Malformed SkyBlock 'bazaar' entry at index "
+                                + i
+                                + ": expected name string");
             String name = element.getAsString();
             Entry entry = byName.get(name);
-            if (entry == null) throw new IllegalStateException("Unknown SkyBlock Bazaar name at index " + i + ": " + name);
+            if (entry == null)
+                throw new IllegalStateException(
+                        "Unknown SkyBlock Bazaar name at index " + i + ": " + name);
             result.add(entry);
         }
         return result;
     }
 
-    private static String requiredString(JsonObject object, String field, String section, int index) {
+    private static String requiredString(
+            JsonObject object, String field, String section, int index) {
         JsonElement value = object.get(field);
-        if (value == null || !value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString() || value.getAsString().isEmpty()) throw new IllegalStateException("Malformed SkyBlock '" + section + "' entry at index " + index + ": field '" + field + "' must be a non-empty string");
+        if (value == null
+                || !value.isJsonPrimitive()
+                || !value.getAsJsonPrimitive().isString()
+                || value.getAsString().isEmpty())
+            throw new IllegalStateException(
+                    "Malformed SkyBlock '"
+                            + section
+                            + "' entry at index "
+                            + index
+                            + ": field '"
+                            + field
+                            + "' must be a non-empty string");
         return value.getAsString();
     }
 }

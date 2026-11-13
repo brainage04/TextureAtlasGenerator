@@ -2,14 +2,13 @@ package io.github.brainage04.textureatlasgenerator.atlas;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlobalSettingsUniform;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.ArrayList;
-import java.util.List;
 
 final class AtlasRenderContext implements AutoCloseable {
     private final List<TextureAtlas> atlases = new ArrayList<>();
@@ -18,14 +17,22 @@ final class AtlasRenderContext implements AutoCloseable {
     private final GlobalSettingsUniform globals;
 
     AtlasRenderContext(Minecraft client) {
-        client.getAtlasManager().forEach((id, atlas) -> {
-            if (!atlas.animatedTexturesStates.isEmpty()) {
-                atlases.add(atlas);
-                for (SpriteContents.AnimationState state : atlas.animatedTexturesStates) {
-                    animations.add(new AnimationSnapshot(state, state.frame, state.subFrame, state.isDirty));
-                }
-            }
-        });
+        client.getAtlasManager()
+                .forEach(
+                        (id, atlas) -> {
+                            if (!atlas.animatedTexturesStates.isEmpty()) {
+                                atlases.add(atlas);
+                                for (SpriteContents.AnimationState state :
+                                        atlas.animatedTexturesStates) {
+                                    animations.add(
+                                            new AnimationSnapshot(
+                                                    state,
+                                                    state.frame,
+                                                    state.subFrame,
+                                                    state.isDirty));
+                                }
+                            }
+                        });
         globals = new GlobalSettingsUniform();
     }
 
@@ -61,5 +68,6 @@ final class AtlasRenderContext implements AutoCloseable {
         }
     }
 
-    private record AnimationSnapshot(SpriteContents.AnimationState state, int frame, int subFrame, boolean dirty) {}
+    private record AnimationSnapshot(
+            SpriteContents.AnimationState state, int frame, int subFrame, boolean dirty) {}
 }
