@@ -1,12 +1,13 @@
 package io.github.brainage04.textureatlasgenerator.atlas;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class AtlasLayoutTest {
     @Test
@@ -41,13 +42,30 @@ class AtlasLayoutTest {
 
     @Test
     void downsampleIgnoresTransparentColourAndAveragesAlpha() {
-        ByteBuffer rgba = ByteBuffer.wrap(new byte[] {
-                0, 0, (byte) 255, 0, 0, 0, (byte) 255, 0,
-                (byte) 255, 0, 0, (byte) 255, 0, (byte) 255, 0, (byte) 255
-        });
+        ByteBuffer rgba =
+                ByteBuffer.wrap(
+                        new byte[] {
+                            0,
+                            0,
+                            (byte) 255,
+                            0,
+                            0,
+                            0,
+                            (byte) 255,
+                            0,
+                            (byte) 255,
+                            0,
+                            0,
+                            (byte) 255,
+                            0,
+                            (byte) 255,
+                            0,
+                            (byte) 255
+                        });
         byte[] target = new byte[12];
         AtlasItemRenderer.downsample(rgba, 2, 2, 2, target, 8, 4);
-        assertArrayEquals(new byte[] {0, 0, 0, 0, (byte) 128, (byte) 128, 0, (byte) 128, 0, 0, 0, 0}, target);
+        assertArrayEquals(
+                new byte[] {0, 0, 0, 0, (byte) 128, (byte) 128, 0, (byte) 128, 0, 0, 0, 0}, target);
     }
 
     @Test
