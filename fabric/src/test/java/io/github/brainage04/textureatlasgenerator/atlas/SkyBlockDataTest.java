@@ -21,19 +21,31 @@ class SkyBlockDataTest {
         assertFalse(bazaar.isEmpty());
         Set<SkyBlockData.Entry> known = new HashSet<>(all);
         for (SkyBlockData.Entry entry : bazaar) {
-            assertTrue(known.contains(entry), "Bazaar item missing from the full list: " + entry.name());
+            assertTrue(
+                    known.contains(entry),
+                    "Bazaar item missing from the full list: " + entry.name());
         }
     }
 
-    /// The exporter hands each skin value to Minecraft as a profile's textures property, and on failure
-    /// `PlayerHeadSkins` reads textures.SKIN.url from it, so every value must decode to that shape.
+    /// The exporter hands each skin value to Minecraft as a profile's textures property, and on
+    /// failure `PlayerHeadSkins` reads textures.SKIN.url from it, so every value must decode to
+    /// that shape.
     @Test
     void everySkinValueDecodesToASkinTextureUrl() {
         for (SkyBlockData.Entry entry : SkyBlockData.all()) {
-            JsonObject decoded = JsonParser.parseString(new String(
-                    Base64.getDecoder().decode(entry.skinValue()), StandardCharsets.UTF_8)).getAsJsonObject();
-            String url = decoded.getAsJsonObject("textures").getAsJsonObject("SKIN").get("url").getAsString();
-            assertTrue(url.matches("https?://textures\\.minecraft\\.net/texture/[0-9a-f]+"),
+            JsonObject decoded =
+                    JsonParser.parseString(
+                                    new String(
+                                            Base64.getDecoder().decode(entry.skinValue()),
+                                            StandardCharsets.UTF_8))
+                            .getAsJsonObject();
+            String url =
+                    decoded.getAsJsonObject("textures")
+                            .getAsJsonObject("SKIN")
+                            .get("url")
+                            .getAsString();
+            assertTrue(
+                    url.matches("https?://textures\\.minecraft\\.net/texture/[0-9a-f]+"),
                     entry.name() + " has skin URL " + url);
         }
     }
