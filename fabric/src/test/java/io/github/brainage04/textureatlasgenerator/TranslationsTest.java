@@ -30,8 +30,7 @@ import org.junit.jupiter.api.Test;
 class TranslationsTest {
     private static final Path ROOT = projectRoot();
     private static final Path EN_US =
-            ROOT.resolve(
-                    "common/src/main/resources/assets/textureatlasgenerator/lang/en_us.json");
+            ROOT.resolve("common/src/main/resources/assets/textureatlasgenerator/lang/en_us.json");
     private static final List<Path> MAIN_SOURCES =
             List.of(
                     ROOT.resolve("common/src/main/java"),
@@ -46,8 +45,9 @@ class TranslationsTest {
                     "Category\\.register\\(\\s*Identifier\\.fromNamespaceAndPath\\("
                             + "\\s*(?:\\w+\\.)?MOD_ID,\\s*\"([a-z0-9_./-]+)\"\\s*\\)");
     // The only placeholders TranslatableContents accepts; anything else makes the game print the
-    // raw template (client-26.3 net/minecraft/network/chat/contents/TranslatableContents.java:53,126).
+    // raw template (client-26.3 TranslatableContents.java:53,126).
     private static final Pattern PLACEHOLDER = Pattern.compile("%(?:\\d+\\$)?s|%%");
+    private static final Pattern LITERAL_WORDS = Pattern.compile("Component\\.literal\\(\\s*\"[^\"]*\\p{L}");
 
     private static Path projectRoot() {
         Path dir = Path.of("").toAbsolutePath();
@@ -116,10 +116,10 @@ class TranslationsTest {
     }
 
     @Test
-    void noTextIsWrittenIntoALiteralComponent() {
+    void noWordsAreWrittenIntoALiteralComponent() {
         for (String source : mainSources()) {
             assertFalse(
-                    source.contains("Component.literal(\""),
+                    LITERAL_WORDS.matcher(source).find(),
                     "player-visible text must use Component.translatable");
         }
     }

@@ -96,15 +96,15 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
 
         atlasButton =
                 addRenderableWidget(
-                        CycleButton.builder(
-                                        AtlasKind::displayName, selectedKind)
+                        CycleButton.builder(AtlasKind::displayName, selectedKind)
                                 .withValues(List.of(AtlasKind.values()))
                                 .create(
                                         left,
                                         controlsY,
                                         typeWidth,
                                         CONTROL_HEIGHT,
-                                        Component.translatable("textureatlasgenerator.screen.atlas"),
+                                        Component.translatable(
+                                                "textureatlasgenerator.screen.atlas"),
                                         (button, kind) -> {
                                             selectedKind = kind;
                                             reloadCatalog();
@@ -384,7 +384,8 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
 
         Component count =
                 filtered.length == catalog.size()
-                        ? Component.translatable("textureatlasgenerator.screen.count", catalog.size())
+                        ? Component.translatable(
+                                "textureatlasgenerator.screen.count", catalog.size())
                         : Component.translatable(
                                 "textureatlasgenerator.screen.count_filtered",
                                 filtered.length,
@@ -544,9 +545,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
 
     private static Component openLink(Path path, MutableComponent text) {
         return text.withStyle(
-                        style ->
-                                style.withUnderlined(true)
-                                        .withClickEvent(new ClickEvent.OpenFile(path)));
+                style -> style.withUnderlined(true).withClickEvent(new ClickEvent.OpenFile(path)));
     }
 
     @Override

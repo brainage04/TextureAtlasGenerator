@@ -124,7 +124,8 @@ public final class GlintExporter {
 
         Path directory = client.gameDirectory.toPath().resolve("texture-atlases");
         String fileBase = FILE_STEM + '_' + pixelSize + 'x' + pixelSize;
-        Component rendering = Component.translatable("textureatlasgenerator.progress.rendering_glint");
+        Component rendering =
+                Component.translatable("textureatlasgenerator.progress.rendering_glint");
         listener.onProgress(
                 new AtlasExporter.Progress(AtlasExporter.Stage.RENDERING, 0, FRAMES, rendering));
         Util.backgroundExecutor()
