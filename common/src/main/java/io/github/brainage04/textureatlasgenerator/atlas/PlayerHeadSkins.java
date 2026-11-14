@@ -5,13 +5,6 @@ import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import io.github.brainage04.textureatlasgenerator.TextureAtlasGenerator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.PlayerSkinRenderCache;
-import net.minecraft.core.ClientAsset;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.util.Util;
-import net.minecraft.world.item.component.ResolvableProfile;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
@@ -25,13 +18,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.PlayerSkinRenderCache;
+import net.minecraft.core.ClientAsset;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.component.ResolvableProfile;
 
 /**
- * Warming {@code SkinManager} alone is not enough: its entries expire 15 seconds after last
- * access, and the head renderer resolves skins through {@code PlayerSkinRenderCache}, which asks
- * {@code SkinManager} again. A head whose skin finished loading more than 15 seconds before its
- * page was drawn therefore started a fresh asynchronous load and was drawn with a default skin,
- * without any error.
+ * Warming {@code SkinManager} alone is not enough: its entries expire 15 seconds after last access,
+ * and the head renderer resolves skins through {@code PlayerSkinRenderCache}, which asks {@code
+ * SkinManager} again. A head whose skin finished loading more than 15 seconds before its page was
+ * drawn therefore started a fresh asynchronous load and was drawn with a default skin, without any
+ * error.
  */
 final class PlayerHeadSkins {
     private static final int MAX_CONCURRENT_LOADS = 8;
@@ -61,9 +60,11 @@ final class PlayerHeadSkins {
     }
 
     void whenReady(List<AtlasCatalog.Entry> page, Runnable render, Consumer<Throwable> failure) {
-        List<CompletableFuture<Optional<PlayerSkinRenderCache.RenderInfo>>> pending = new ArrayList<>();
+        List<CompletableFuture<Optional<PlayerSkinRenderCache.RenderInfo>>> pending =
+                new ArrayList<>();
         for (AtlasCatalog.Entry entry : page) {
-            CompletableFuture<Optional<PlayerSkinRenderCache.RenderInfo>> lookup = cache.lookup(profile(entry));
+            CompletableFuture<Optional<PlayerSkinRenderCache.RenderInfo>> lookup =
+                    cache.lookup(profile(entry));
             if (!lookup.isDone()) {
                 pending.add(lookup);
             }
@@ -79,18 +80,23 @@ final class PlayerHeadSkins {
                     pending.size());
         }
         CompletableFuture.allOf(pending.toArray(CompletableFuture[]::new))
-                .whenComplete((ignored, error) -> client.schedule(() -> {
-                    if (error != null) {
-                        failure.accept(error);
-                    } else {
-                        verifyAndRun(page, render, failure);
-                    }
-                }));
+                .whenComplete(
+                        (ignored, error) ->
+                                client.schedule(
+                                        () -> {
+                                            if (error != null) {
+                                                failure.accept(error);
+                                            } else {
+                                                verifyAndRun(page, render, failure);
+                                            }
+                                        }));
     }
 
-    private void verifyAndRun(List<AtlasCatalog.Entry> page, Runnable render, Consumer<Throwable> failure) {
+    private void verifyAndRun(
+            List<AtlasCatalog.Entry> page, Runnable render, Consumer<Throwable> failure) {
         for (AtlasCatalog.Entry entry : page) {
-            String problem = problem(entry, cache.lookup(profile(entry)).getNow(Optional.empty()), null);
+            String problem =
+                    problem(entry, cache.lookup(profile(entry)).getNow(Optional.empty()), null);
             if (problem != null) {
                 failure.accept(new SkinLoadException(entry.name() + ": " + problem));
                 return;
@@ -103,11 +109,16 @@ final class PlayerHeadSkins {
         while (active < MAX_CONCURRENT_LOADS && nextIndex < entries.size()) {
             AtlasCatalog.Entry entry = entries.get(nextIndex++);
             active++;
-            cache.lookup(profile(entry)).whenComplete((info, error) -> client.schedule(() -> complete(entry, info, error)));
+            cache.lookup(profile(entry))
+                    .whenComplete(
+                            (info, error) -> client.schedule(() -> complete(entry, info, error)));
         }
     }
 
-    private void complete(AtlasCatalog.Entry entry, Optional<PlayerSkinRenderCache.RenderInfo> info, Throwable error) {
+    private void complete(
+            AtlasCatalog.Entry entry,
+            Optional<PlayerSkinRenderCache.RenderInfo> info,
+            Throwable error) {
         active--;
         completed++;
         String problem = problem(entry, info, error);
@@ -128,14 +139,20 @@ final class PlayerHeadSkins {
     }
 
     private static String problem(
-            AtlasCatalog.Entry entry, Optional<PlayerSkinRenderCache.RenderInfo> info, Throwable error) {
+            AtlasCatalog.Entry entry,
+            Optional<PlayerSkinRenderCache.RenderInfo> info,
+            Throwable error) {
         if (error != null) {
-            Throwable cause = error instanceof CompletionException && error.getCause() != null ? error.getCause() : error;
+            Throwable cause =
+                    error instanceof CompletionException && error.getCause() != null
+                            ? error.getCause()
+                            : error;
             return cause.toString();
         }
         if (info == null || info.isEmpty()) {
             return "Minecraft could not load the skin (see the 'Failed to load texture for profile "
-                    + entry.profile().id() + "' warning in latest.log)";
+                    + entry.profile().id()
+                    + "' warning in latest.log)";
         }
         if (!(info.get().playerSkin().body() instanceof ClientAsset.DownloadedTexture)) {
             return "resolved to a default skin instead of its textures property";
@@ -146,25 +163,49 @@ final class PlayerHeadSkins {
     /** Re-requests one failed skin URL so the HTTP result is in the message. */
     private void reportFailures() {
         AtlasCatalog.Entry probe = firstFailure;
-        CompletableFuture.supplyAsync(() -> probe(probe.profile(), client.getProxy()), Util.ioPool()).whenComplete((result, error) ->
-                client.schedule(() -> {
-                    StringBuilder message = new StringBuilder()
-                            .append(failures.size()).append(" of ").append(entries.size())
-                            .append(" player-head skins failed to load; no atlas was written. ");
-                    for (int index = 0; index < Math.min(REPORTED_FAILURES, failures.size()); index++) {
-                        message.append(index == 0 ? "" : "; ").append(failures.get(index));
-                    }
-                    if (failures.size() > REPORTED_FAILURES) {
-                        message.append("; and ").append(failures.size() - REPORTED_FAILURES).append(" more");
-                    }
-                    message.append(". Re-requesting ").append(probe.name()).append("'s skin: ")
-                            .append(error != null ? error.toString() : result).append('.');
-                    SkinLoadException exception = new SkinLoadException(message.toString());
-                    for (String failure : failures) {
-                        TextureAtlasGenerator.LOGGER.error("Player-head skin failed: {}", failure);
-                    }
-                    loaded.completeExceptionally(exception);
-                }));
+        CompletableFuture.supplyAsync(
+                        () -> probe(probe.profile(), client.getProxy()), Util.ioPool())
+                .whenComplete(
+                        (result, error) ->
+                                client.schedule(
+                                        () -> {
+                                            StringBuilder message =
+                                                    new StringBuilder()
+                                                            .append(failures.size())
+                                                            .append(" of ")
+                                                            .append(entries.size())
+                                                            .append(
+                                                                    " player-head skins failed to load; no atlas was written. ");
+                                            for (int index = 0;
+                                                    index
+                                                            < Math.min(
+                                                                    REPORTED_FAILURES,
+                                                                    failures.size());
+                                                    index++) {
+                                                message.append(index == 0 ? "" : "; ")
+                                                        .append(failures.get(index));
+                                            }
+                                            if (failures.size() > REPORTED_FAILURES) {
+                                                message.append("; and ")
+                                                        .append(failures.size() - REPORTED_FAILURES)
+                                                        .append(" more");
+                                            }
+                                            message.append(". Re-requesting ")
+                                                    .append(probe.name())
+                                                    .append("'s skin: ")
+                                                    .append(
+                                                            error != null
+                                                                    ? error.toString()
+                                                                    : result)
+                                                    .append('.');
+                                            SkinLoadException exception =
+                                                    new SkinLoadException(message.toString());
+                                            for (String failure : failures) {
+                                                TextureAtlasGenerator.LOGGER.error(
+                                                        "Player-head skin failed: {}", failure);
+                                            }
+                                            loaded.completeExceptionally(exception);
+                                        }));
     }
 
     /** Requests the skin URL through the same proxy as Minecraft's skin downloader. */
@@ -172,9 +213,17 @@ final class PlayerHeadSkins {
         String url;
         try {
             Property textures = profile.properties().get("textures").iterator().next();
-            JsonObject decoded = JsonParser.parseString(new String(
-                    Base64.getDecoder().decode(textures.value()), StandardCharsets.UTF_8)).getAsJsonObject();
-            url = decoded.getAsJsonObject("textures").getAsJsonObject("SKIN").get("url").getAsString();
+            JsonObject decoded =
+                    JsonParser.parseString(
+                                    new String(
+                                            Base64.getDecoder().decode(textures.value()),
+                                            StandardCharsets.UTF_8))
+                            .getAsJsonObject();
+            url =
+                    decoded.getAsJsonObject("textures")
+                            .getAsJsonObject("SKIN")
+                            .get("url")
+                            .getAsString();
         } catch (RuntimeException error) {
             return "the textures property could not be decoded (" + error + ")";
         }

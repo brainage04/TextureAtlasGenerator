@@ -3,6 +3,7 @@ package io.github.brainage04.textureatlasgenerator;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.brainage04.minecraftmodconventions.ClientGameTestRecorder;
 import io.github.brainage04.minecraftmodconventions.ClientGameTestServers;
 import io.github.brainage04.textureatlasgenerator.atlas.AtlasCatalog;
@@ -12,18 +13,6 @@ import io.github.brainage04.textureatlasgenerator.atlas.AtlasLayout;
 import io.github.brainage04.textureatlasgenerator.atlas.GlintExporter;
 import io.github.brainage04.textureatlasgenerator.atlas.SkyBlockData;
 import io.github.brainage04.textureatlasgenerator.screen.TextureAtlasScreen;
-import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
-import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.core.registries.BuiltInRegistries;
-import org.lwjgl.glfw.GLFW;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +24,16 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
+import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class TextureAtlasGeneratorClientGameTest implements FabricClientGameTest {
@@ -45,22 +44,30 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
     @Override
     public void runTest(ClientGameTestContext context) {
         Properties serverProperties = ClientGameTestServers.flatServerProperties();
-        ClientGameTestServers.withDedicatedServer(context, serverProperties, "Texture Atlas Generator GameTest", server -> { try {
-            cleanupOutputs(context);
-            runConnectedTest(context);
-        } finally {
-            cleanupOutputs(context);
-        } });
+        ClientGameTestServers.withDedicatedServer(
+                context,
+                serverProperties,
+                "Texture Atlas Generator GameTest",
+                server -> {
+                    try {
+                        cleanupOutputs(context);
+                        runConnectedTest(context);
+                    } finally {
+                        cleanupOutputs(context);
+                    }
+                });
     }
 
     private void runConnectedTest(ClientGameTestContext context) {
-        context.runOnClient(client -> {
-            if (!TextureAtlasGenerator.isInitialized()) {
-                throw new AssertionError("Expected the client initializer to run before the client GameTest");
-            }
-        });
+        context.runOnClient(
+                client -> {
+                    if (!TextureAtlasGenerator.isInitialized()) {
+                        throw new AssertionError(
+                                "Expected the client initializer to run before the client GameTest");
+                    }
+                });
         ClientGameTestServers.assertClientWorldAndPlayerAvailable(context);
-        context.getInput().pressKey(GLFW.GLFW_KEY_G);
+        context.getInput().pressKey(InputConstants.KEY_G);
         context.waitForScreen(TextureAtlasScreen.class);
         verifySizeControls(context);
         verifyReopenedPreview(context);
@@ -72,8 +79,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
                 context,
                 "texture_atlas.command_opens_screen",
                 "Texture Atlas Generator",
-                "/atlas typed into chat opens the generator screen"
-        );
+                "/atlas typed into chat opens the generator screen");
         runChatCommand(context, "/atlas");
         context.waitForScreen(TextureAtlasScreen.class);
         context.waitTicks(50);
@@ -86,10 +92,17 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         List<AtlasCatalog.Entry> vanillaCatalog = AtlasCatalog.create(AtlasKind.VANILLA);
         int potionVariants = BuiltInRegistries.POTION.size() + 1;
         for (String id : List.of("potion", "splash_potion", "lingering_potion", "tipped_arrow")) {
-            long count = vanillaCatalog.stream().filter(entry -> entry.name().equals("minecraft:" + id)
-                    || entry.name().startsWith("minecraft:" + id + "[")).count();
+            long count =
+                    vanillaCatalog.stream()
+                            .filter(
+                                    entry ->
+                                            entry.name().equals("minecraft:" + id)
+                                                    || entry.name()
+                                                            .startsWith("minecraft:" + id + "["))
+                            .count();
             if (count != potionVariants) {
-                throw new AssertionError("Expected " + potionVariants + " variants for " + id + ", found " + count);
+                throw new AssertionError(
+                        "Expected " + potionVariants + " variants for " + id + ", found " + count);
             }
         }
         JsonObject vanilla = export(context, AtlasKind.VANILLA, 1200);
@@ -98,11 +111,17 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         }
 
         AtlasLayout paged = AtlasLayout.of(vanillaCatalog.size(), AtlasExporter.MAX_PIXEL_SIZE);
-        if (paged.pages().size() < 2 || paged.entryCount() != vanillaCatalog.size()
-                || paged.pages().stream().anyMatch(page -> page.side(AtlasExporter.MAX_PIXEL_SIZE) > AtlasLayout.MAX_PAGE_SIDE)) {
+        if (paged.pages().size() < 2
+                || paged.entryCount() != vanillaCatalog.size()
+                || paged.pages().stream()
+                        .anyMatch(
+                                page ->
+                                        page.side(AtlasExporter.MAX_PIXEL_SIZE)
+                                                > AtlasLayout.MAX_PAGE_SIDE)) {
             throw new AssertionError("Unexpected 1024 px vanilla layout " + paged);
         }
-        List<Path> vanillaOutputs = outputs(context, AtlasExporter.fileBase(AtlasKind.VANILLA, PIXEL_SIZE), EXTENSIONS);
+        List<Path> vanillaOutputs =
+                outputs(context, AtlasExporter.fileBase(AtlasKind.VANILLA, PIXEL_SIZE), EXTENSIONS);
         List<byte[]> firstExport = readOutputs(vanillaOutputs);
         export(context, AtlasKind.VANILLA, 1200);
         List<byte[]> repeatedExport = readOutputs(vanillaOutputs);
@@ -117,14 +136,14 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         verifyFailedExportCleansMappings(context, false);
 
         if (AtlasCatalog.create(AtlasKind.SKYBLOCK_BAZAAR).size() != 351) {
-            throw new AssertionError("Expected all 351 legacy Bazaar entries in the deterministic catalog");
+            throw new AssertionError(
+                    "Expected all 351 legacy Bazaar entries in the deterministic catalog");
         }
         ClientGameTestRecorder.showStep(
                 context,
                 "texture_atlas.hypixel_skyblock_bazaar_items.catalog",
                 "Hypixel SkyBlock Bazaar catalog",
-                "The 351-item Bazaar catalog is available for preview; its remote player-head export is intentionally not recorded"
-        );
+                "The 351-item Bazaar catalog is available for preview; its remote player-head export is intentionally not recorded");
         openScreen(context, AtlasKind.SKYBLOCK_BAZAAR);
         context.waitForScreen(TextureAtlasScreen.class);
         context.waitTicks(50);
@@ -132,74 +151,143 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
     }
 
     private static void verifySizeControls(ClientGameTestContext context) {
-        context.runOnClient(client -> {
-            TextureAtlasScreen screen = (TextureAtlasScreen) client.gui.screen();
-            EditBox size = screen.children().stream().filter(EditBox.class::isInstance)
-                    .map(EditBox.class::cast).filter(box -> box.getMessage().getString().equals("Pixel size"))
-                    .findFirst().orElseThrow();
-            Button export = screen.children().stream().filter(Button.class::isInstance)
-                    .map(Button.class::cast).filter(button -> button.getMessage().getString().equals("Export atlas"))
-                    .findFirst().orElseThrow();
-            for (String invalid : List.of("", "0", "1025", "-1", "abc")) {
-                size.setValue(invalid);
-                if (export.active) {
-                    throw new AssertionError("Export enabled for invalid size " + invalid);
-                }
-            }
-            size.setValue("13");
-            if (!export.active) {
-                throw new AssertionError("Export disabled for a valid non-power-of-two size");
-            }
-        });
+        context.runOnClient(
+                client -> {
+                    TextureAtlasScreen screen = (TextureAtlasScreen) client.gui.screen();
+                    EditBox size =
+                            screen.children().stream()
+                                    .filter(EditBox.class::isInstance)
+                                    .map(EditBox.class::cast)
+                                    .filter(
+                                            box ->
+                                                    box.getMessage()
+                                                            .getString()
+                                                            .equals("Pixel size"))
+                                    .findFirst()
+                                    .orElseThrow();
+                    Button export =
+                            screen.children().stream()
+                                    .filter(Button.class::isInstance)
+                                    .map(Button.class::cast)
+                                    .filter(
+                                            button ->
+                                                    button.getMessage()
+                                                            .getString()
+                                                            .equals("Export atlas"))
+                                    .findFirst()
+                                    .orElseThrow();
+                    for (String invalid : List.of("", "0", "1025", "-1", "abc")) {
+                        size.setValue(invalid);
+                        if (export.active) {
+                            throw new AssertionError("Export enabled for invalid size " + invalid);
+                        }
+                    }
+                    size.setValue("13");
+                    if (!export.active) {
+                        throw new AssertionError(
+                                "Export disabled for a valid non-power-of-two size");
+                    }
+                });
     }
 
     private static void verifyReopenedPreview(ClientGameTestContext context) {
-        Identifier preview = Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "atlas_preview");
-        context.waitFor(client -> client.getTextureManager().getTexture(preview) instanceof DynamicTexture, 200);
-        context.runOnClient(client -> {
-            TextureAtlasScreen screen = (TextureAtlasScreen) client.gui.screen();
-            EditBox search = screen.children().stream().filter(EditBox.class::isInstance)
-                    .map(EditBox.class::cast).filter(box -> box.getMessage().getString().equals("Search atlas items"))
-                    .findFirst().orElseThrow();
-            search.setValue("diamond");
-            client.gui.setScreen(new Screen(Component.literal("Child screen")) {});
-            client.gui.setScreen(screen);
-            EditBox restored = screen.children().stream().filter(EditBox.class::isInstance)
-                    .map(EditBox.class::cast).filter(box -> box.getMessage().getString().equals("Search atlas items"))
-                    .findFirst().orElseThrow();
-            if (!restored.getValue().equals("diamond")) {
-                throw new AssertionError("Search was lost when the generator was reinitialized");
-            }
-        });
-        context.waitFor(client -> client.getTextureManager().getTexture(preview) instanceof DynamicTexture, 200);
+        Identifier preview =
+                Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "atlas_preview");
+        context.waitFor(
+                client -> client.getTextureManager().getTexture(preview) instanceof DynamicTexture,
+                200);
+        context.runOnClient(
+                client -> {
+                    TextureAtlasScreen screen = (TextureAtlasScreen) client.gui.screen();
+                    EditBox search =
+                            screen.children().stream()
+                                    .filter(EditBox.class::isInstance)
+                                    .map(EditBox.class::cast)
+                                    .filter(
+                                            box ->
+                                                    box.getMessage()
+                                                            .getString()
+                                                            .equals("Search atlas items"))
+                                    .findFirst()
+                                    .orElseThrow();
+                    search.setValue("diamond");
+                    client.gui.setScreen(new Screen(Component.literal("Child screen")) {});
+                    client.gui.setScreen(screen);
+                    EditBox restored =
+                            screen.children().stream()
+                                    .filter(EditBox.class::isInstance)
+                                    .map(EditBox.class::cast)
+                                    .filter(
+                                            box ->
+                                                    box.getMessage()
+                                                            .getString()
+                                                            .equals("Search atlas items"))
+                                    .findFirst()
+                                    .orElseThrow();
+                    if (!restored.getValue().equals("diamond")) {
+                        throw new AssertionError(
+                                "Search was lost when the generator was reinitialized");
+                    }
+                });
+        context.waitFor(
+                client -> client.getTextureManager().getTexture(preview) instanceof DynamicTexture,
+                200);
     }
 
-    private static void verifyFailedExportCleansMappings(ClientGameTestContext context, boolean glint) {
+    private static void verifyFailedExportCleansMappings(
+            ClientGameTestContext context, boolean glint) {
         Path directory = outputs(context, "unused", List.of(".json")).getFirst().getParent();
-        String base = glint ? GlintExporter.FILE_STEM + "_1x1" : AtlasExporter.fileBase(AtlasKind.VANILLA, 1);
+        String base =
+                glint
+                        ? GlintExporter.FILE_STEM + "_1x1"
+                        : AtlasExporter.fileBase(AtlasKind.VANILLA, 1);
         Path blockedCss = directory.resolve(base + ".css.tmp");
         AtomicReference<Throwable> failure = new AtomicReference<>();
         try {
             Files.createDirectory(blockedCss);
-            context.runOnClient(client -> {
-                AtlasExporter.Listener listener = new AtlasExporter.Listener() {
-                    @Override public void onProgress(AtlasExporter.Progress progress) {}
-                    @Override public void onSuccess(AtlasExporter.Result result) {
-                        failure.set(new AssertionError("Export unexpectedly succeeded: " + base));
-                    }
-                    @Override public void onFailure(Throwable error) { failure.set(error); }
-                };
-                boolean started = glint ? GlintExporter.start(client, 1, listener)
-                        : AtlasExporter.start(client, AtlasKind.VANILLA, 1, listener);
-                if (!started) {
-                    throw new AssertionError("Previous export still holds the export slot");
-                }
-            });
+            context.runOnClient(
+                    client -> {
+                        AtlasExporter.Listener listener =
+                                new AtlasExporter.Listener() {
+                                    @Override
+                                    public void onProgress(AtlasExporter.Progress progress) {}
+
+                                    @Override
+                                    public void onSuccess(AtlasExporter.Result result) {
+                                        failure.set(
+                                                new AssertionError(
+                                                        "Export unexpectedly succeeded: " + base));
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable error) {
+                                        failure.set(error);
+                                    }
+                                };
+                        boolean started =
+                                glint
+                                        ? GlintExporter.start(client, 1, listener)
+                                        : AtlasExporter.start(
+                                                client, AtlasKind.VANILLA, 1, listener);
+                        if (!started) {
+                            throw new AssertionError("Previous export still holds the export slot");
+                        }
+                    });
             context.waitFor(client -> failure.get() != null && !AtlasExporter.isExporting(), 1200);
             if (!(failure.get() instanceof java.io.IOException)) {
                 throw new AssertionError("Expected an I/O failure", failure.get());
             }
-            for (String suffix : List.of(".json.tmp", ".txt.tmp", ".css.tmp", ".webp.tmp", ".tmp.webp", ".webp", ".json", ".txt", ".css")) {
+            for (String suffix :
+                    List.of(
+                            ".json.tmp",
+                            ".txt.tmp",
+                            ".css.tmp",
+                            ".webp.tmp",
+                            ".tmp.webp",
+                            ".webp",
+                            ".json",
+                            ".txt",
+                            ".css")) {
                 if (Files.exists(directory.resolve(base + suffix))) {
                     throw new AssertionError("Failed export left " + base + suffix);
                 }
@@ -230,17 +318,17 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
     private static void runChatCommand(ClientGameTestContext context, String command) {
         context.setScreen(() -> new ChatScreen(command, false));
         context.waitTicks(2);
-        context.getInput().pressKey(GLFW.GLFW_KEY_ENTER);
+        context.getInput().pressKey(InputConstants.KEY_RETURN);
     }
 
-    private static JsonObject export(ClientGameTestContext context, AtlasKind kind, int timeoutTicks) {
+    private static JsonObject export(
+            ClientGameTestContext context, AtlasKind kind, int timeoutTicks) {
         String command = "/atlas " + kind.commandName() + " " + PIXEL_SIZE;
         ClientGameTestRecorder.showStep(
                 context,
                 "texture_atlas." + kind.fileStem() + ".exporting",
                 kind.displayName() + " export",
-                command + " renders the atlas and shows its progress"
-        );
+                command + " renders the atlas and shows its progress");
         List<Path> outputs = outputs(context, AtlasExporter.fileBase(kind, PIXEL_SIZE), EXTENSIONS);
         try {
             for (Path output : outputs) {
@@ -254,22 +342,29 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         context.waitForScreen(TextureAtlasScreen.class);
         context.waitFor(client -> AtlasExporter.isExporting(), 100);
         context.takeScreenshot("texture-atlas-" + kind.fileStem() + "-exporting");
-        context.waitFor(client -> !AtlasExporter.isExporting() && outputs.stream().allMatch(Files::isRegularFile), timeoutTicks);
+        context.waitFor(
+                client ->
+                        !AtlasExporter.isExporting()
+                                && outputs.stream().allMatch(Files::isRegularFile),
+                timeoutTicks);
 
         ClientGameTestRecorder.showStep(
                 context,
                 "texture_atlas." + kind.fileStem() + ".saved",
                 kind.displayName() + " atlas saved",
-                "The WebP and its JSON, text and CSS mappings have been written"
-        );
+                "The WebP and its JSON, text and CSS mappings have been written");
         context.waitTicks(20);
         context.takeScreenshot("texture-atlas-" + kind.fileStem() + "-saved");
         return validate(kind, outputs);
     }
 
-    private static List<Path> outputs(ClientGameTestContext context, String fileBase, List<String> extensions) {
+    private static List<Path> outputs(
+            ClientGameTestContext context, String fileBase, List<String> extensions) {
         AtomicReference<Path> outputDirectory = new AtomicReference<>();
-        context.runOnClient(client -> outputDirectory.set(client.gameDirectory.toPath().resolve("texture-atlases")));
+        context.runOnClient(
+                client ->
+                        outputDirectory.set(
+                                client.gameDirectory.toPath().resolve("texture-atlases")));
         List<Path> outputs = new ArrayList<>();
         for (String extension : extensions) {
             outputs.add(outputDirectory.get().resolve(fileBase + extension));
@@ -279,23 +374,51 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
 
     private static JsonObject validate(AtlasKind kind, List<Path> outputs) {
         try {
-            JsonObject mapping = JsonParser.parseString(Files.readString(outputs.get(1), StandardCharsets.UTF_8)).getAsJsonObject();
+            JsonObject mapping =
+                    JsonParser.parseString(Files.readString(outputs.get(1), StandardCharsets.UTF_8))
+                            .getAsJsonObject();
             JsonArray items = mapping.get("items").getAsJsonArray();
             int itemCount = AtlasCatalog.create(kind).size();
             int columns = AtlasLayout.columnsFor(itemCount);
             JsonArray pages = mapping.getAsJsonArray("pages");
-            if (pages.size() != 1 || !pages.get(0).getAsJsonObject().get("image").getAsString().equals(outputs.get(0).getFileName().toString())) {
-                throw new AssertionError(kind + " mapping should describe one page, " + outputs.get(0).getFileName() + ": " + pages);
+            if (pages.size() != 1
+                    || !pages.get(0)
+                            .getAsJsonObject()
+                            .get("image")
+                            .getAsString()
+                            .equals(outputs.get(0).getFileName().toString())) {
+                throw new AssertionError(
+                        kind
+                                + " mapping should describe one page, "
+                                + outputs.get(0).getFileName()
+                                + ": "
+                                + pages);
             }
             if (items.size() != itemCount || mapping.get("pixelSize").getAsInt() != PIXEL_SIZE) {
-                throw new AssertionError(kind + " mapping has " + items.size() + " items at "
-                        + mapping.get("pixelSize") + " px; expected " + itemCount + " at " + PIXEL_SIZE);
+                throw new AssertionError(
+                        kind
+                                + " mapping has "
+                                + items.size()
+                                + " items at "
+                                + mapping.get("pixelSize")
+                                + " px; expected "
+                                + itemCount
+                                + " at "
+                                + PIXEL_SIZE);
             }
 
             WebPInfo image = WebPInfo.read(outputs.get(0));
-            if (image.width() != columns * PIXEL_SIZE || image.height() != columns * PIXEL_SIZE || image.animated()) {
-                throw new AssertionError("Unexpected " + kind + " image " + image + "; expected a square still "
-                        + columns * PIXEL_SIZE + " px wide");
+            if (image.width() != columns * PIXEL_SIZE
+                    || image.height() != columns * PIXEL_SIZE
+                    || image.animated()) {
+                throw new AssertionError(
+                        "Unexpected "
+                                + kind
+                                + " image "
+                                + image
+                                + "; expected a square still "
+                                + columns * PIXEL_SIZE
+                                + " px wide");
             }
 
             List<String> lines = Files.readAllLines(outputs.get(2), StandardCharsets.UTF_8);
@@ -303,15 +426,36 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
             Set<String> classes = new HashSet<>();
             for (int index = 0; index < items.size(); index++) {
                 JsonObject item = items.get(index).getAsJsonObject();
-                String expectedLine = item.get("displayName").getAsString() + " (" + item.get("name").getAsString()
-                        + "): [" + index % columns + ", " + index / columns + "]";
+                String expectedLine =
+                        item.get("displayName").getAsString()
+                                + " ("
+                                + item.get("name").getAsString()
+                                + "): ["
+                                + index % columns
+                                + ", "
+                                + index / columns
+                                + "]";
                 if (!lines.get(index).equals(expectedLine)) {
-                    throw new AssertionError(kind + " text line " + index + " is '" + lines.get(index) + "', expected '" + expectedLine + "'");
+                    throw new AssertionError(
+                            kind
+                                    + " text line "
+                                    + index
+                                    + " is '"
+                                    + lines.get(index)
+                                    + "', expected '"
+                                    + expectedLine
+                                    + "'");
                 }
                 String cssClass = item.get("cssClass").getAsString();
-                if (!cssClass.matches("[A-Za-z_][A-Za-z0-9_-]*") || !classes.add(cssClass)
+                if (!cssClass.matches("[A-Za-z_][A-Za-z0-9_-]*")
+                        || !classes.add(cssClass)
                         || !css.contains("." + cssClass + " { --tag-position: ")) {
-                    throw new AssertionError(kind + " CSS class for " + item.get("name") + " is missing, invalid or duplicated: " + cssClass);
+                    throw new AssertionError(
+                            kind
+                                    + " CSS class for "
+                                    + item.get("name")
+                                    + " is missing, invalid or duplicated: "
+                                    + cssClass);
                 }
             }
             return mapping;
@@ -322,19 +466,36 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
 
     private static void exportGlint(ClientGameTestContext context) {
         String command = "/atlas glint " + PIXEL_SIZE;
-        ClientGameTestRecorder.showStep(context, "texture_atlas.glint.exporting", "Enchantment glint loop",
+        ClientGameTestRecorder.showStep(
+                context,
+                "texture_atlas.glint.exporting",
+                "Enchantment glint loop",
                 command + " renders the glint loop as an animated WebP");
-        List<Path> outputs = outputs(context, GlintExporter.FILE_STEM + '_' + PIXEL_SIZE + 'x' + PIXEL_SIZE, GLINT_EXTENSIONS);
+        List<Path> outputs =
+                outputs(
+                        context,
+                        GlintExporter.FILE_STEM + '_' + PIXEL_SIZE + 'x' + PIXEL_SIZE,
+                        GLINT_EXTENSIONS);
         runChatCommand(context, command);
         context.waitForScreen(TextureAtlasScreen.class);
-        context.waitFor(client -> !AtlasExporter.isExporting() && outputs.stream().allMatch(Files::isRegularFile), 1200);
+        context.waitFor(
+                client ->
+                        !AtlasExporter.isExporting()
+                                && outputs.stream().allMatch(Files::isRegularFile),
+                1200);
         try {
             WebPInfo image = WebPInfo.read(outputs.get(0));
-            if (image.width() != PIXEL_SIZE || image.height() != PIXEL_SIZE || !image.animated()
-                    || image.frames() != GlintExporter.FRAMES || image.frameMillis() != (long) GlintExporter.FRAMES * GlintExporter.FRAME_MILLIS) {
+            if (image.width() != PIXEL_SIZE
+                    || image.height() != PIXEL_SIZE
+                    || !image.animated()
+                    || image.frames() != GlintExporter.FRAMES
+                    || image.frameMillis()
+                            != (long) GlintExporter.FRAMES * GlintExporter.FRAME_MILLIS) {
                 throw new AssertionError("Unexpected glint animation " + image);
             }
-            JsonObject description = JsonParser.parseString(Files.readString(outputs.get(1), StandardCharsets.UTF_8)).getAsJsonObject();
+            JsonObject description =
+                    JsonParser.parseString(Files.readString(outputs.get(1), StandardCharsets.UTF_8))
+                            .getAsJsonObject();
             if (description.get("loopSeconds").getAsDouble() != 82.5) {
                 throw new AssertionError("The glint loop is not 82.5 s: " + description);
             }
@@ -345,8 +506,11 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
 
     private record WebPInfo(int width, int height, boolean animated, int frames, long frameMillis) {
         static WebPInfo read(Path path) throws Exception {
-            ByteBuffer data = ByteBuffer.wrap(Files.readAllBytes(path)).order(ByteOrder.LITTLE_ENDIAN);
-            if (data.getInt(0) != 0x46464952 || data.getInt(8) != 0x50424557 || data.getInt(4) + 8 != data.capacity()) {
+            ByteBuffer data =
+                    ByteBuffer.wrap(Files.readAllBytes(path)).order(ByteOrder.LITTLE_ENDIAN);
+            if (data.getInt(0) != 0x46464952
+                    || data.getInt(8) != 0x50424557
+                    || data.getInt(4) + 8 != data.capacity()) {
                 throw new AssertionError(path + " is not a complete WebP file");
             }
             int width = 0;
@@ -355,7 +519,15 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
             int frames = 0;
             long frameMillis = 0;
             for (int at = 12; at + 8 <= data.capacity(); ) {
-                String type = new String(new byte[] {data.get(at), data.get(at + 1), data.get(at + 2), data.get(at + 3)}, StandardCharsets.US_ASCII);
+                String type =
+                        new String(
+                                new byte[] {
+                                    data.get(at),
+                                    data.get(at + 1),
+                                    data.get(at + 2),
+                                    data.get(at + 3)
+                                },
+                                StandardCharsets.US_ASCII);
                 int size = data.getInt(at + 4);
                 int payload = at + 8;
                 switch (type) {
@@ -376,7 +548,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
                         frames++;
                         frameMillis += uint24(data, payload + 12);
                     }
-                    default -> { }
+                    default -> {}
                 }
                 at = payload + size + (size & 1);
             }
@@ -384,38 +556,45 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         }
 
         private static int uint24(ByteBuffer data, int at) {
-            return (data.get(at) & 0xFF) | (data.get(at + 1) & 0xFF) << 8 | (data.get(at + 2) & 0xFF) << 16;
+            return (data.get(at) & 0xFF)
+                    | (data.get(at + 1) & 0xFF) << 8
+                    | (data.get(at + 2) & 0xFF) << 16;
         }
     }
 
     private static void openScreen(ClientGameTestContext context, AtlasKind kind) {
         context.waitTicks(1);
-        context.runOnClient(client -> {
-            TextureAtlasScreen screen = new TextureAtlasScreen(client.gui.screen());
-            screen.setSelection(kind, PIXEL_SIZE);
-            client.gui.setScreen(screen);
-        });
+        context.runOnClient(
+                client -> {
+                    TextureAtlasScreen screen = new TextureAtlasScreen(client.gui.screen());
+                    screen.setSelection(kind, PIXEL_SIZE);
+                    client.gui.setScreen(screen);
+                });
     }
 
     private static void cleanupOutputs(ClientGameTestContext context) {
-        context.runOnClient(client -> {
-            Path outputDirectory = client.gameDirectory.toPath().resolve("texture-atlases");
-            List<String> fileBases = new ArrayList<>();
-            for (AtlasKind kind : AtlasKind.values()) {
-                fileBases.add(AtlasExporter.fileBase(kind, PIXEL_SIZE));
-            }
-            fileBases.add(GlintExporter.FILE_STEM + '_' + PIXEL_SIZE + 'x' + PIXEL_SIZE);
-            try {
-                for (String fileBase : fileBases) {
-                    for (String extension : List.of(".webp", ".png", ".json", ".txt", ".css")) {
-                        Files.deleteIfExists(outputDirectory.resolve(fileBase + extension));
-                        Files.deleteIfExists(outputDirectory.resolve(fileBase + extension + ".tmp"));
-                        Files.deleteIfExists(outputDirectory.resolve(fileBase + ".tmp" + extension));
+        context.runOnClient(
+                client -> {
+                    Path outputDirectory = client.gameDirectory.toPath().resolve("texture-atlases");
+                    List<String> fileBases = new ArrayList<>();
+                    for (AtlasKind kind : AtlasKind.values()) {
+                        fileBases.add(AtlasExporter.fileBase(kind, PIXEL_SIZE));
                     }
-                }
-            } catch (Exception error) {
-                throw new AssertionError("Unable to clean atlas GameTest output", error);
-            }
-        });
+                    fileBases.add(GlintExporter.FILE_STEM + '_' + PIXEL_SIZE + 'x' + PIXEL_SIZE);
+                    try {
+                        for (String fileBase : fileBases) {
+                            for (String extension :
+                                    List.of(".webp", ".png", ".json", ".txt", ".css")) {
+                                Files.deleteIfExists(outputDirectory.resolve(fileBase + extension));
+                                Files.deleteIfExists(
+                                        outputDirectory.resolve(fileBase + extension + ".tmp"));
+                                Files.deleteIfExists(
+                                        outputDirectory.resolve(fileBase + ".tmp" + extension));
+                            }
+                        }
+                    } catch (Exception error) {
+                        throw new AssertionError("Unable to clean atlas GameTest output", error);
+                    }
+                });
     }
 }

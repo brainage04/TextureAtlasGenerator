@@ -5,6 +5,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.brainage04.textureatlasgenerator.image.WebPWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.feature.ItemFeatureRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -13,40 +19,36 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.Util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-
 /**
- * Exports one atlas cell of the item enchantment glint as a looping animated WebP on a
- * transparent background, for drawing over website icons.
+ * Exports one atlas cell of the item enchantment glint as a looping animated WebP on a transparent
+ * background, for drawing over website icons.
  *
- * <p>The glint is computed exactly as 26.2 draws it on an item in the inventory, rather than
+ * <p>The glint is computed exactly as 26.3 draws it on an item in the inventory, rather than
  * captured from the screen: the {@code enchanted_glint_item} texture (bilinear, repeating) is
  * sampled through {@code TextureTransform.GLINT_TEXTURING} at the enchanted book sprite's
  * item-atlas UVs, scaled by the default glint strength and blended with {@code BlendFunction.GLINT}
  * ({@code SRC_COLOR, ONE}), which adds {@code (strength × texel)²} to the icon. The scroll repeats
  * every 330,000 {@code TextureTransform} units, which at the default glint speed is 82.5 s.
  *
- * <p>Each pixel stores that addition {@code C} as colour {@code C / max(C)} with alpha
- * {@code max(C)}, so {@code mix-blend-mode: plus-lighter} reproduces the in-game result exactly
- * and ordinary alpha blending gives a close approximation.
+ * <p>Each pixel stores that addition {@code C} as colour {@code C / max(C)} with alpha {@code
+ * max(C)}, so {@code mix-blend-mode: plus-lighter} reproduces the in-game result exactly and
+ * ordinary alpha blending gives a close approximation.
  */
 public final class GlintExporter {
     public static final int DEFAULT_PIXEL_SIZE = 64;
     public static final int FRAME_MILLIS = 50;
+
     /** One full loop of both glint layers at the default glint speed: 82.5 s. */
     public static final int FRAMES = 1650;
+
     public static final String FILE_STEM = "enchantment_glint";
 
     private static final double GLINT_SPEED = 0.5;
     private static final double GLINT_STRENGTH = 0.75;
     private static final double ROTATION = Math.PI / 18;
     private static final double SCALE = 8.0;
-    private static final Identifier REFERENCE_SPRITE = Identifier.withDefaultNamespace("item/enchanted_book");
+    private static final Identifier REFERENCE_SPRITE =
+            Identifier.withDefaultNamespace("item/enchanted_book");
 
     private final int pixelSize;
     private final float[] glint;
@@ -57,7 +59,12 @@ public final class GlintExporter {
     private final float u1;
     private final float v1;
 
-    private GlintExporter(int pixelSize, float[] glint, int glintWidth, int glintHeight, TextureAtlasSprite sprite) {
+    private GlintExporter(
+            int pixelSize,
+            float[] glint,
+            int glintWidth,
+            int glintHeight,
+            TextureAtlasSprite sprite) {
         this.pixelSize = pixelSize;
         this.glint = glint;
         this.glintWidth = glintWidth;
@@ -70,20 +77,30 @@ public final class GlintExporter {
 
     public static boolean start(Minecraft client, int pixelSize, AtlasExporter.Listener listener) {
         if (pixelSize < AtlasExporter.MIN_PIXEL_SIZE || pixelSize > AtlasExporter.MAX_PIXEL_SIZE) {
-            throw new IllegalArgumentException("Pixel size must be between "
-                    + AtlasExporter.MIN_PIXEL_SIZE + " and " + AtlasExporter.MAX_PIXEL_SIZE);
+            throw new IllegalArgumentException(
+                    "Pixel size must be between "
+                            + AtlasExporter.MIN_PIXEL_SIZE
+                            + " and "
+                            + AtlasExporter.MAX_PIXEL_SIZE);
         }
         if (!AtlasExporter.claim()) {
             return false;
         }
         GlintExporter exporter;
         try {
-            TextureAtlasSprite sprite = client.getAtlasManager().getAtlasOrThrow(AtlasIds.ITEMS).getSprite(REFERENCE_SPRITE);
-            Optional<Resource> resource = client.getResourceManager().getResource(ItemFeatureRenderer.ENCHANTED_GLINT_ITEM);
+            TextureAtlasSprite sprite =
+                    client.getAtlasManager()
+                            .getAtlasOrThrow(AtlasIds.ITEMS)
+                            .getSprite(REFERENCE_SPRITE);
+            Optional<Resource> resource =
+                    client.getResourceManager()
+                            .getResource(ItemFeatureRenderer.ENCHANTED_GLINT_ITEM);
             if (resource.isEmpty()) {
-                throw new IllegalStateException("Missing " + ItemFeatureRenderer.ENCHANTED_GLINT_ITEM);
+                throw new IllegalStateException(
+                        "Missing " + ItemFeatureRenderer.ENCHANTED_GLINT_ITEM);
             }
-            try (InputStream in = resource.get().open(); NativeImage image = NativeImage.read(in)) {
+            try (InputStream in = resource.get().open();
+                    NativeImage image = NativeImage.read(in)) {
                 int width = image.getWidth();
                 int height = image.getHeight();
                 float[] texels = new float[width * height * 3];
@@ -106,25 +123,45 @@ public final class GlintExporter {
 
         Path directory = client.gameDirectory.toPath().resolve("texture-atlases");
         String fileBase = FILE_STEM + '_' + pixelSize + 'x' + pixelSize;
-        listener.onProgress(new AtlasExporter.Progress(AtlasExporter.Stage.RENDERING, 0, FRAMES, "Rendering glint frames…"));
-        Util.backgroundExecutor().execute(() -> {
-            Path temporary = directory.resolve(fileBase + ".tmp.webp");
-            try {
-                AtlasExporter.Result result = exporter.write(directory, fileBase, temporary, completed ->
-                        client.schedule(() -> listener.onProgress(new AtlasExporter.Progress(
-                                AtlasExporter.Stage.RENDERING, completed, FRAMES, "Rendering glint frames…"))));
-                client.schedule(() -> {
-                    AtlasExporter.release();
-                    listener.onSuccess(result);
-                });
-            } catch (Throwable error) {
-                AtlasExporter.deleteQuietly(temporary);
-                client.schedule(() -> {
-                    AtlasExporter.release();
-                    listener.onFailure(error);
-                });
-            }
-        });
+        listener.onProgress(
+                new AtlasExporter.Progress(
+                        AtlasExporter.Stage.RENDERING, 0, FRAMES, "Rendering glint frames…"));
+        Util.backgroundExecutor()
+                .execute(
+                        () -> {
+                            Path temporary = directory.resolve(fileBase + ".tmp.webp");
+                            try {
+                                AtlasExporter.Result result =
+                                        exporter.write(
+                                                directory,
+                                                fileBase,
+                                                temporary,
+                                                completed ->
+                                                        client.schedule(
+                                                                () ->
+                                                                        listener.onProgress(
+                                                                                new AtlasExporter
+                                                                                        .Progress(
+                                                                                        AtlasExporter
+                                                                                                .Stage
+                                                                                                .RENDERING,
+                                                                                        completed,
+                                                                                        FRAMES,
+                                                                                        "Rendering glint frames…"))));
+                                client.schedule(
+                                        () -> {
+                                            AtlasExporter.release();
+                                            listener.onSuccess(result);
+                                        });
+                            } catch (Throwable error) {
+                                AtlasExporter.deleteQuietly(temporary);
+                                client.schedule(
+                                        () -> {
+                                            AtlasExporter.release();
+                                            listener.onFailure(error);
+                                        });
+                            }
+                        });
         return true;
     }
 
@@ -132,10 +169,13 @@ public final class GlintExporter {
         void completed(int frames);
     }
 
-    private AtlasExporter.Result write(Path directory, String fileBase, Path temporary, FrameProgress progress) throws IOException {
+    private AtlasExporter.Result write(
+            Path directory, String fileBase, Path temporary, FrameProgress progress)
+            throws IOException {
         Files.createDirectories(directory);
         int[] frame = new int[pixelSize * pixelSize];
-        try (WebPWriter.Animation animation = new WebPWriter.Animation(temporary, pixelSize, pixelSize, 0)) {
+        try (WebPWriter.Animation animation =
+                new WebPWriter.Animation(temporary, pixelSize, pixelSize, 0)) {
             for (int index = 0; index < FRAMES; index++) {
                 renderFrame((long) index * FRAME_MILLIS, frame);
                 animation.addFrame(frame, FRAME_MILLIS);
@@ -152,8 +192,14 @@ public final class GlintExporter {
         Path temporaryJson = directory.resolve(fileBase + ".json.tmp");
         Path temporaryCss = directory.resolve(fileBase + ".css.tmp");
         try {
-            AtlasExporter.writeTemporary(temporaryJson, new GsonBuilder().setPrettyPrinting().disableHtmlEscaping()
-                    .create().toJson(description(imageName)) + '\n');
+            AtlasExporter.writeTemporary(
+                    temporaryJson,
+                    new GsonBuilder()
+                                    .setPrettyPrinting()
+                                    .disableHtmlEscaping()
+                                    .create()
+                                    .toJson(description(imageName))
+                            + '\n');
             AtlasExporter.writeTemporary(temporaryCss, css(imageName));
             AtlasExporter.replace(temporary, image);
             AtlasExporter.replace(temporaryJson, json);
@@ -163,7 +209,11 @@ public final class GlintExporter {
             AtlasExporter.deleteQuietly(temporaryCss);
         }
         return new AtlasExporter.Result(
-                "the " + (FRAMES * FRAME_MILLIS / 1000.0) + " s enchantment glint loop (" + FRAMES + " frames)",
+                "the "
+                        + (FRAMES * FRAME_MILLIS / 1000.0)
+                        + " s enchantment glint loop ("
+                        + FRAMES
+                        + " frames)",
                 List.of(image),
                 List.of(json, css),
                 directory);
@@ -202,8 +252,13 @@ public final class GlintExporter {
                 int green = toByte(sum[1] / (samples * samples));
                 int blue = toByte(sum[2] / (samples * samples));
                 int alpha = Math.max(red, Math.max(green, blue));
-                argb[y * pixelSize + x] = alpha == 0 ? 0
-                        : alpha << 24 | unpremultiply(red, alpha) << 16 | unpremultiply(green, alpha) << 8 | unpremultiply(blue, alpha);
+                argb[y * pixelSize + x] =
+                        alpha == 0
+                                ? 0
+                                : alpha << 24
+                                        | unpremultiply(red, alpha) << 16
+                                        | unpremultiply(green, alpha) << 8
+                                        | unpremultiply(blue, alpha);
             }
         }
     }
@@ -245,10 +300,12 @@ public final class GlintExporter {
         json.addProperty("frameMilliseconds", FRAME_MILLIS);
         json.addProperty("loopSeconds", FRAMES * FRAME_MILLIS / 1000.0);
         json.addProperty("blend", "plus-lighter");
-        json.addProperty("usage", "Draw over an icon with mix-blend-mode: plus-lighter, masked by the icon's alpha "
-                + "(see the .css file). Each pixel's colour times its alpha is what Minecraft adds to the icon.");
+        json.addProperty(
+                "usage",
+                "Draw over an icon with mix-blend-mode: plus-lighter, masked by the icon's alpha "
+                        + "(see the .css file). Each pixel's colour times its alpha is what Minecraft adds to the icon.");
         JsonObject source = new JsonObject();
-        source.addProperty("minecraft", "26.2");
+        source.addProperty("minecraft", "26.3");
         source.addProperty("texture", ItemFeatureRenderer.ENCHANTED_GLINT_ITEM.toString());
         source.addProperty("sprite", REFERENCE_SPRITE.toString());
         JsonArray uv = new JsonArray();
@@ -264,8 +321,15 @@ public final class GlintExporter {
     }
 
     private String css(String imageName) {
-        return "/* " + imageName + ": the " + (FRAMES * FRAME_MILLIS / 1000.0) + " s Minecraft enchantment glint loop, "
-                + pixelSize + "x" + pixelSize + " px. Generated by Texture Atlas Generator.\n"
+        return "/* "
+                + imageName
+                + ": the "
+                + (FRAMES * FRAME_MILLIS / 1000.0)
+                + " s Minecraft enchantment glint loop, "
+                + pixelSize
+                + "x"
+                + pixelSize
+                + " px. Generated by Texture Atlas Generator.\n"
                 + "   Add the tag-glint class to an atlas icon, e.g.\n"
                 + "   <span class=\"vanilla_items vanilla_items-minecraft-diamond_sword tag-glint\"></span>.\n"
                 + "   The glint is confined to the icon through the atlas stylesheet's --tag-mask. */\n"
@@ -278,7 +342,9 @@ public final class GlintExporter {
                 + "  position: absolute;\n"
                 + "  inset: 0;\n"
                 + "  pointer-events: none;\n"
-                + "  background: url(\"" + imageName + "\") 0 0 / 100% 100% no-repeat;\n"
+                + "  background: url(\""
+                + imageName
+                + "\") 0 0 / 100% 100% no-repeat;\n"
                 + "  mix-blend-mode: plus-lighter;\n"
                 + "  -webkit-mask: var(--tag-mask);\n"
                 + "  mask: var(--tag-mask);\n"

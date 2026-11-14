@@ -52,6 +52,8 @@ public record AtlasLayout(int pixelSize, List<Page> pages) {
     }
 
     public String imageFileName(String base, int page, String extension) {
-        return pages.size() == 1 ? base + '.' + extension : base + '_' + (page + 1) + '.' + extension;
+        return pages.size() == 1
+                ? base + '.' + extension
+                : base + '_' + (page + 1) + '.' + extension;
     }
 }

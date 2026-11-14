@@ -2,7 +2,6 @@ package io.github.brainage04.textureatlasgenerator.atlas;
 
 import io.github.brainage04.textureatlasgenerator.image.PngStreamWriter;
 import io.github.brainage04.textureatlasgenerator.image.WebPWriter;
-
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -22,17 +21,28 @@ abstract sealed class AtlasImage permits AtlasImage.Png, AtlasImage.WebP {
         }
     }
 
-    /** WebP needs the whole image in memory; PNG is streamed, so it is used when the heap cannot hold the image. */
+    /**
+     * WebP needs the whole image in memory; PNG is streamed, so it is used when the heap cannot
+     * hold the image.
+     */
     static Choice choose(int side) {
         if (side > WebPWriter.MAX_DIMENSION) {
-            throw new IllegalArgumentException(side + " px exceeds WebP's " + WebPWriter.MAX_DIMENSION + " px limit");
+            throw new IllegalArgumentException(
+                    side + " px exceeds WebP's " + WebPWriter.MAX_DIMENSION + " px limit");
         }
         Runtime runtime = Runtime.getRuntime();
         long available = runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory());
         long needed = (long) side * side * 4 * 5 / 4;
         if (needed > available) {
-            return new Choice(Format.PNG, "a " + side + " px WebP needs about " + (needed >> 20)
-                    + " MiB of free memory; " + (available >> 20) + " MiB is available");
+            return new Choice(
+                    Format.PNG,
+                    "a "
+                            + side
+                            + " px WebP needs about "
+                            + (needed >> 20)
+                            + " MiB of free memory; "
+                            + (available >> 20)
+                            + " MiB is available");
         }
         return new Choice(Format.WEBP, null);
     }
@@ -91,8 +101,11 @@ abstract sealed class AtlasImage permits AtlasImage.Png, AtlasImage.WebP {
             int target = rowsWritten * width;
             int source = offset;
             for (int pixel = 0; pixel < rows * width; pixel++) {
-                argb[target + pixel] = (rgba[source + 3] & 0xFF) << 24 | (rgba[source] & 0xFF) << 16
-                        | (rgba[source + 1] & 0xFF) << 8 | (rgba[source + 2] & 0xFF);
+                argb[target + pixel] =
+                        (rgba[source + 3] & 0xFF) << 24
+                                | (rgba[source] & 0xFF) << 16
+                                | (rgba[source + 1] & 0xFF) << 8
+                                | (rgba[source + 2] & 0xFF);
                 source += 4;
             }
             rowsWritten += rows;
@@ -101,7 +114,8 @@ abstract sealed class AtlasImage permits AtlasImage.Png, AtlasImage.WebP {
         @Override
         void finish() throws IOException {
             if (rowsWritten != height) {
-                throw new IllegalStateException("WebP finished after " + rowsWritten + " of " + height + " rows");
+                throw new IllegalStateException(
+                        "WebP finished after " + rowsWritten + " of " + height + " rows");
             }
             int[] pixels = argb;
             argb = null;

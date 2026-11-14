@@ -1,16 +1,14 @@
 package io.github.brainage04.textureatlasgenerator.atlas;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.DeltaTracker;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlobalSettingsUniform;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.ArrayList;
-import java.util.List;
 
 final class AtlasRenderContext implements AutoCloseable {
     private final List<TextureAtlas> atlases = new ArrayList<>();
@@ -19,19 +17,27 @@ final class AtlasRenderContext implements AutoCloseable {
     private final GlobalSettingsUniform globals;
 
     AtlasRenderContext(Minecraft client) {
-        client.getAtlasManager().forEach((id, atlas) -> {
-            if (!atlas.animatedTexturesStates.isEmpty()) {
-                atlases.add(atlas);
-                for (SpriteContents.AnimationState state : atlas.animatedTexturesStates) {
-                    animations.add(new AnimationSnapshot(state, state.frame, state.subFrame, state.isDirty));
-                }
-            }
-        });
+        client.getAtlasManager()
+                .forEach(
+                        (id, atlas) -> {
+                            if (!atlas.animatedTexturesStates.isEmpty()) {
+                                atlases.add(atlas);
+                                for (SpriteContents.AnimationState state :
+                                        atlas.animatedTexturesStates) {
+                                    animations.add(
+                                            new AnimationSnapshot(
+                                                    state,
+                                                    state.frame,
+                                                    state.subFrame,
+                                                    state.isDirty));
+                                }
+                            }
+                        });
         globals = new GlobalSettingsUniform();
     }
 
     void apply(int width, int height) {
-        globals.update(width, height, 0.75, 0, DeltaTracker.ZERO, 0, Vec3.ZERO, false);
+        globals.update(width, height, 0.75, 0, 0.0F, 0, Vec3.ZERO, false);
         for (AnimationSnapshot snapshot : animations) {
             snapshot.state.frame = 0;
             snapshot.state.subFrame = 0;
@@ -62,5 +68,6 @@ final class AtlasRenderContext implements AutoCloseable {
         }
     }
 
-    private record AnimationSnapshot(SpriteContents.AnimationState state, int frame, int subFrame, boolean dirty) {}
+    private record AnimationSnapshot(
+            SpriteContents.AnimationState state, int frame, int subFrame, boolean dirty) {}
 }

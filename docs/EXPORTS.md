@@ -35,7 +35,7 @@ Items are drawn exactly as in an inventory slot, without the enchantment glint, 
 
 ## Glint overlay
 
-`enchantment_glint_<size>x<size>.webp` is one cell of the item enchantment glint as it moves over the enchanted book in the inventory: 1,650 frames at 20 frames per second, the 82.5 seconds after which both glint layers line up again at the default Glint Speed, looping forever. It is computed from the glint texture and 26.2's glint transform and blending rather than captured, so the background stays transparent. Each pixel's colour times its alpha is the light Minecraft adds, so drawing it with `mix-blend-mode: plus-lighter` reproduces the game exactly. `enchantment_glint_<size>x<size>.css` adds a `tag-glint` class that does this, masked to the icon through the atlas stylesheet:
+`enchantment_glint_<size>x<size>.webp` is one cell of the item enchantment glint as it moves over the enchanted book in the inventory: 1,650 frames at 20 frames per second, the 82.5 seconds after which both glint layers line up again at the default Glint Speed, looping forever. It is computed from the glint texture and 26.3's glint transform and blending rather than captured, so the background stays transparent. Each pixel's colour times its alpha is the light Minecraft adds, so drawing it with `mix-blend-mode: plus-lighter` reproduces the game exactly. `enchantment_glint_<size>x<size>.css` adds a `tag-glint` class that does this, masked to the icon through the atlas stylesheet:
 
 ```html
 <span class="vanilla_items vanilla_items-minecraft-diamond_sword tag-glint"></span>
