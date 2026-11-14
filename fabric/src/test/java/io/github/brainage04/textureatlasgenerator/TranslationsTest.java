@@ -47,7 +47,8 @@ class TranslationsTest {
     // The only placeholders TranslatableContents accepts; anything else makes the game print the
     // raw template (client-26.3 TranslatableContents.java:53,126).
     private static final Pattern PLACEHOLDER = Pattern.compile("%(?:\\d+\\$)?s|%%");
-    private static final Pattern LITERAL_WORDS = Pattern.compile("Component\\.literal\\(\\s*\"[^\"]*\\p{L}");
+    private static final Pattern LITERAL_WORDS =
+            Pattern.compile("Component\\.literal\\(\\s*\"[^\"]*\\p{L}");
 
     private static Path projectRoot() {
         Path dir = Path.of("").toAbsolutePath();
