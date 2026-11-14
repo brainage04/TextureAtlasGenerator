@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.feature.ItemFeatureRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.data.AtlasIds;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.Util;
@@ -123,9 +124,9 @@ public final class GlintExporter {
 
         Path directory = client.gameDirectory.toPath().resolve("texture-atlases");
         String fileBase = FILE_STEM + '_' + pixelSize + 'x' + pixelSize;
+        Component rendering = Component.translatable("textureatlasgenerator.progress.rendering_glint");
         listener.onProgress(
-                new AtlasExporter.Progress(
-                        AtlasExporter.Stage.RENDERING, 0, FRAMES, "Rendering glint frames…"));
+                new AtlasExporter.Progress(AtlasExporter.Stage.RENDERING, 0, FRAMES, rendering));
         Util.backgroundExecutor()
                 .execute(
                         () -> {
@@ -147,7 +148,7 @@ public final class GlintExporter {
                                                                                                 .RENDERING,
                                                                                         completed,
                                                                                         FRAMES,
-                                                                                        "Rendering glint frames…"))));
+                                                                                        rendering))));
                                 client.schedule(
                                         () -> {
                                             AtlasExporter.release();
@@ -209,11 +210,10 @@ public final class GlintExporter {
             AtlasExporter.deleteQuietly(temporaryCss);
         }
         return new AtlasExporter.Result(
-                "the "
-                        + (FRAMES * FRAME_MILLIS / 1000.0)
-                        + " s enchantment glint loop ("
-                        + FRAMES
-                        + " frames)",
+                Component.translatable(
+                        "textureatlasgenerator.summary.glint",
+                        FRAMES * FRAME_MILLIS / 1000.0,
+                        FRAMES),
                 List.of(image),
                 List.of(json, css),
                 directory);

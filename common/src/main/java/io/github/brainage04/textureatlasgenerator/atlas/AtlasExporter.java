@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 
@@ -125,7 +126,9 @@ public final class AtlasExporter {
             openPage(0);
             return;
         }
-        progress(Stage.DOWNLOADING_SKINS, 0, entries.size(), "Downloading player-head textures…");
+        Component downloading =
+                Component.translatable("textureatlasgenerator.progress.downloading_skins");
+        progress(Stage.DOWNLOADING_SKINS, 0, entries.size(), downloading);
         skins.preload(
                         completed -> {
                             if (completed == 1 || completed % 16 == 0) {
@@ -133,7 +136,7 @@ public final class AtlasExporter {
                                         Stage.DOWNLOADING_SKINS,
                                         completed,
                                         entries.size(),
-                                        "Downloading player-head textures…");
+                                        downloading);
                             }
                         })
                 .whenComplete(
@@ -230,12 +233,11 @@ public final class AtlasExporter {
                 done,
                 entries.size(),
                 layout.pages().size() == 1
-                        ? "Rendering item models…"
-                        : "Rendering page "
-                                + (pageIndex + 1)
-                                + " of "
-                                + layout.pages().size()
-                                + "…");
+                        ? Component.translatable("textureatlasgenerator.progress.rendering_items")
+                        : Component.translatable(
+                                "textureatlasgenerator.progress.rendering_page",
+                                pageIndex + 1,
+                                layout.pages().size()));
         Runnable render =
                 () ->
                         renderer.renderPage(
@@ -313,7 +315,11 @@ public final class AtlasExporter {
 
     private void writeOutputs() {
         String extension = format.format().extension();
-        progress(Stage.WRITING, entries.size(), entries.size(), "Writing mappings…");
+        progress(
+                Stage.WRITING,
+                entries.size(),
+                entries.size(),
+                Component.translatable("textureatlasgenerator.progress.writing"));
         JsonObject extra = new JsonObject();
         if (format.fallbackReason() != null) {
             extra.addProperty("formatNote", "PNG because " + format.fallbackReason());
@@ -349,22 +355,28 @@ public final class AtlasExporter {
                                 replace(temporaryMappings.get(2), css);
                                 deleteStaleImages(imageNames);
                                 int pageSide = layout.pages().getFirst().side(pixelSize);
-                                String summary =
-                                        entries.size()
-                                                + " items ("
-                                                + (images.size() == 1
-                                                        ? pageSide + "x" + pageSide + " px"
-                                                        : images.size()
-                                                                + " pages of up to "
-                                                                + pageSide
-                                                                + "x"
-                                                                + pageSide
-                                                                + " px")
-                                                + (format.fallbackReason() == null
-                                                        ? ""
-                                                        : ", PNG because "
-                                                                + format.fallbackReason())
-                                                + ")";
+                                Component size =
+                                        images.size() == 1
+                                                ? Component.translatable(
+                                                        "textureatlasgenerator.summary.page_size",
+                                                        pageSide,
+                                                        pageSide)
+                                                : Component.translatable(
+                                                        "textureatlasgenerator.summary.pages",
+                                                        images.size(),
+                                                        pageSide,
+                                                        pageSide);
+                                Component summary =
+                                        format.fallbackReason() == null
+                                                ? Component.translatable(
+                                                        "textureatlasgenerator.summary.atlas",
+                                                        entries.size(),
+                                                        size)
+                                                : Component.translatable(
+                                                        "textureatlasgenerator.summary.atlas_png",
+                                                        entries.size(),
+                                                        size,
+                                                        format.fallbackReason());
                                 Result result =
                                         new Result(
                                                 summary,
@@ -428,7 +440,7 @@ public final class AtlasExporter {
         }
     }
 
-    private void progress(Stage stage, long completed, long total, String message) {
+    private void progress(Stage stage, long completed, long total, Component message) {
         listener.onProgress(new Progress(stage, completed, total, message));
     }
 
@@ -451,13 +463,14 @@ public final class AtlasExporter {
         WRITING
     }
 
-    public record Progress(Stage stage, long completed, long total, String message) {
+    public record Progress(Stage stage, long completed, long total, Component message) {
         public int percentage() {
             return total == 0 ? 0 : (int) Math.clamp(completed * 100 / total, 0, 100);
         }
     }
 
-    public record Result(String summary, List<Path> images, List<Path> mappings, Path directory) {}
+    public record Result(
+            Component summary, List<Path> images, List<Path> mappings, Path directory) {}
 
     public interface Listener {
         void onProgress(Progress progress);

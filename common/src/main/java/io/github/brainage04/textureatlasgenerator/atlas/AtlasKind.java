@@ -1,23 +1,28 @@
 package io.github.brainage04.textureatlasgenerator.atlas;
 
-public enum AtlasKind {
-    VANILLA("Vanilla items", "vanilla_items", "vanilla"),
-    SKYBLOCK_ALL("Hypixel SkyBlock — all items", "hypixel_skyblock_items", "skyblock-all"),
-    SKYBLOCK_BAZAAR(
-            "Hypixel SkyBlock — Bazaar items", "hypixel_skyblock_bazaar_items", "skyblock-bazaar");
+import net.minecraft.network.chat.Component;
 
-    private final String displayName;
+public enum AtlasKind {
+    VANILLA("textureatlasgenerator.atlas.vanilla", "vanilla_items", "vanilla"),
+    SKYBLOCK_ALL(
+            "textureatlasgenerator.atlas.skyblock_all", "hypixel_skyblock_items", "skyblock-all"),
+    SKYBLOCK_BAZAAR(
+            "textureatlasgenerator.atlas.skyblock_bazaar",
+            "hypixel_skyblock_bazaar_items",
+            "skyblock-bazaar");
+
+    private final String translationKey;
     private final String fileStem;
     private final String commandName;
 
-    AtlasKind(String displayName, String fileStem, String commandName) {
-        this.displayName = displayName;
+    AtlasKind(String translationKey, String fileStem, String commandName) {
+        this.translationKey = translationKey;
         this.fileStem = fileStem;
         this.commandName = commandName;
     }
 
-    public String displayName() {
-        return displayName;
+    public Component displayName() {
+        return Component.translatable(translationKey);
     }
 
     public String fileStem() {

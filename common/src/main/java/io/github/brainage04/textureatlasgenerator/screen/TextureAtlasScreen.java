@@ -40,7 +40,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     private AtlasPreview preview;
     private int scrollRow;
     private AtlasExporter.Progress progress;
-    private Component status = Component.literal("Choose an atlas and export size.");
+    private Component status = Component.translatable("textureatlasgenerator.status.choose");
     private boolean statusIsError;
     private boolean exportOnOpen;
     private int glintExportOnOpen;
@@ -55,7 +55,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     private EditBox searchBox;
 
     public TextureAtlasScreen(Screen parent) {
-        super(Component.literal(TextureAtlasGenerator.MOD_NAME));
+        super(Component.translatable("textureatlasgenerator.screen.title"));
         this.parent = parent;
     }
 
@@ -97,14 +97,14 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
         atlasButton =
                 addRenderableWidget(
                         CycleButton.builder(
-                                        kind -> Component.literal(kind.displayName()), selectedKind)
+                                        AtlasKind::displayName, selectedKind)
                                 .withValues(List.of(AtlasKind.values()))
                                 .create(
                                         left,
                                         controlsY,
                                         typeWidth,
                                         CONTROL_HEIGHT,
-                                        Component.literal("Atlas"),
+                                        Component.translatable("textureatlasgenerator.screen.atlas"),
                                         (button, kind) -> {
                                             selectedKind = kind;
                                             reloadCatalog();
@@ -127,7 +127,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
                                 controlsY,
                                 50,
                                 CONTROL_HEIGHT,
-                                Component.literal("Pixel size")));
+                                Component.translatable("textureatlasgenerator.screen.pixel_size")));
         sizeBox.setMaxLength(4);
         sizeBox.setValue(Integer.toString(pixelSize));
         sizeBox.setResponder(this::onSizeTyped);
@@ -140,7 +140,10 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
                                 .build());
         exportButton =
                 addRenderableWidget(
-                        Button.builder(Component.literal("Export atlas"), button -> export())
+                        Button.builder(
+                                        Component.translatable(
+                                                "textureatlasgenerator.screen.export_atlas"),
+                                        button -> export())
                                 .bounds(sizeX + 98, controlsY, 111, CONTROL_HEIGHT)
                                 .build());
 
@@ -154,13 +157,16 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
                                 secondRowY,
                                 controlsWidth - glintWidth - 6,
                                 CONTROL_HEIGHT,
-                                Component.literal("Search atlas items")));
-        searchBox.setHint(Component.literal("Search by item name or identifier"));
+                                Component.translatable("textureatlasgenerator.screen.search")));
+        searchBox.setHint(Component.translatable("textureatlasgenerator.screen.search_hint"));
         searchBox.setValue(search);
         searchBox.setResponder(ignored -> applySearch());
         glintButton =
                 addRenderableWidget(
-                        Button.builder(Component.literal("Export glint"), button -> exportGlint())
+                        Button.builder(
+                                        Component.translatable(
+                                                "textureatlasgenerator.screen.export_glint"),
+                                        button -> exportGlint())
                                 .bounds(
                                         left + controlsWidth - glintWidth,
                                         secondRowY,
@@ -168,9 +174,8 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
                                         CONTROL_HEIGHT)
                                 .tooltip(
                                         Tooltip.create(
-                                                Component.literal(
-                                                        "Exports one cell of the 82.5 s enchantment glint loop, at the pixel size above, "
-                                                                + "as an animated WebP to draw over icons.")))
+                                                Component.translatable(
+                                                        "textureatlasgenerator.screen.export_glint.tooltip")))
                                 .build());
 
         // init() runs again whenever resources reload; keep the catalog and search across it.
@@ -196,11 +201,10 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
             catalogKind = selectedKind;
             applySearch();
             status =
-                    Component.literal(
-                            selectedKind.displayName()
-                                    + ": "
-                                    + catalog.size()
-                                    + " items. The preview shows them as the export will draw them.");
+                    Component.translatable(
+                            "textureatlasgenerator.status.catalog",
+                            selectedKind.displayName(),
+                            catalog.size());
             statusIsError = false;
             configurePreview();
         } catch (Throwable error) {
@@ -252,18 +256,16 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     private void export() {
         if (!sizeIsValid()) {
             status =
-                    Component.literal(
-                            "Pixel size must be between "
-                                    + AtlasExporter.MIN_PIXEL_SIZE
-                                    + " and "
-                                    + AtlasExporter.MAX_PIXEL_SIZE
-                                    + ".");
+                    Component.translatable(
+                            "textureatlasgenerator.status.invalid_size",
+                            AtlasExporter.MIN_PIXEL_SIZE,
+                            AtlasExporter.MAX_PIXEL_SIZE);
             statusIsError = true;
             return;
         }
         Minecraft client = Minecraft.getInstance();
         if (!AtlasExporter.start(client, selectedKind, pixelSize, this)) {
-            status = Component.literal("Another atlas export is already running.");
+            status = Component.translatable("textureatlasgenerator.status.busy");
             statusIsError = true;
         }
         updateControls();
@@ -272,17 +274,15 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     private void exportGlint() {
         if (!sizeIsValid()) {
             status =
-                    Component.literal(
-                            "Pixel size must be between "
-                                    + AtlasExporter.MIN_PIXEL_SIZE
-                                    + " and "
-                                    + AtlasExporter.MAX_PIXEL_SIZE
-                                    + ".");
+                    Component.translatable(
+                            "textureatlasgenerator.status.invalid_size",
+                            AtlasExporter.MIN_PIXEL_SIZE,
+                            AtlasExporter.MAX_PIXEL_SIZE);
             statusIsError = true;
             return;
         }
         if (!GlintExporter.start(Minecraft.getInstance(), pixelSize, this)) {
-            status = Component.literal("Another atlas export is already running.");
+            status = Component.translatable("textureatlasgenerator.status.busy");
             statusIsError = true;
         }
         updateControls();
@@ -329,7 +329,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
         graphics.centeredText(font, title, width / 2, 14, 0xFFFFFFFF);
         graphics.text(
                 font,
-                "px",
+                Component.translatable("textureatlasgenerator.screen.pixel_unit"),
                 sizeBox.getX() + sizeBox.getWidth() - 14,
                 sizeBox.getY() + 6,
                 0xFFA0A0A0);
@@ -382,14 +382,22 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
         }
         graphics.disableScissor();
 
-        String count =
+        Component count =
                 filtered.length == catalog.size()
-                        ? catalog.size() + " items"
-                        : filtered.length + " of " + catalog.size() + " items";
-        String previewStatus = preview.status();
+                        ? Component.translatable("textureatlasgenerator.screen.count", catalog.size())
+                        : Component.translatable(
+                                "textureatlasgenerator.screen.count_filtered",
+                                filtered.length,
+                                catalog.size());
+        Component previewStatus = preview.status();
         graphics.text(
                 font,
-                previewStatus == null ? count : count + " – " + previewStatus,
+                previewStatus == null
+                        ? count
+                        : Component.translatable(
+                                "textureatlasgenerator.screen.count_with_preview",
+                                count,
+                                previewStatus),
                 left,
                 bottom + 6,
                 0xFFA0A0A0);
@@ -411,7 +419,9 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
                     List.of(
                             lines.getFirst(),
                             Language.getInstance()
-                                    .getVisualOrder(Component.literal("… (full message in chat)")));
+                                    .getVisualOrder(
+                                            Component.translatable(
+                                                    "textureatlasgenerator.status.truncated")));
         }
         for (int line = 0; line < lines.size(); line++) {
             graphics.centeredText(font, lines.get(line), width / 2, height - 36 + line * 10, color);
@@ -435,12 +445,11 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     public void onProgress(AtlasExporter.Progress currentProgress) {
         progress = currentProgress;
         status =
-                Component.literal(
-                        currentProgress.message()
-                                + " "
-                                + currentProgress.completed()
-                                + '/'
-                                + currentProgress.total());
+                Component.translatable(
+                        "textureatlasgenerator.status.progress",
+                        currentProgress.message(),
+                        currentProgress.completed(),
+                        currentProgress.total());
         statusIsError = false;
         updateControls();
     }
@@ -449,14 +458,16 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     public void onSuccess(AtlasExporter.Result result) {
         progress = null;
         status =
-                Component.literal(
-                        "Saved "
-                                + result.summary()
-                                + " to "
-                                + result.images().getFirst().getFileName()
-                                + (result.images().size() > 1
-                                        ? " and " + (result.images().size() - 1) + " more pages."
-                                        : "."));
+                result.images().size() > 1
+                        ? Component.translatable(
+                                "textureatlasgenerator.status.saved_pages",
+                                result.summary(),
+                                result.images().getFirst().getFileName().toString(),
+                                result.images().size() - 1)
+                        : Component.translatable(
+                                "textureatlasgenerator.status.saved",
+                                result.summary(),
+                                result.images().getFirst().getFileName().toString());
         statusIsError = false;
         updateControls();
         announceSuccess(result);
@@ -471,7 +482,7 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     }
 
     private void reportFailure(Throwable error) {
-        status = Component.literal("Export failed: " + describe(error));
+        status = Component.translatable("textureatlasgenerator.export_failed", describe(error));
         statusIsError = true;
         TextureAtlasGenerator.LOGGER.error("Atlas generation failed", error);
     }
@@ -490,14 +501,23 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
             links.add(
                     openLink(
                             result.directory(),
-                            "the other " + (result.images().size() - 1) + " pages"));
+                            Component.translatable(
+                                    "textureatlasgenerator.chat.other_pages",
+                                    result.images().size() - 1)));
         }
         result.mappings().forEach(path -> links.add(openFileLink(path)));
         MutableComponent message =
-                Component.literal("[Texture Atlas Generator] Saved " + result.summary() + ": ");
+                Component.translatable("textureatlasgenerator.chat.prefix")
+                        .append(
+                                Component.translatable(
+                                        "textureatlasgenerator.chat.saved", result.summary()));
         for (int index = 0; index < links.size(); index++) {
             if (index > 0) {
-                message.append(Component.literal(index == links.size() - 1 ? " and " : ", "));
+                message.append(
+                        Component.translatable(
+                                index == links.size() - 1
+                                        ? "textureatlasgenerator.chat.list_last_separator"
+                                        : "textureatlasgenerator.chat.list_separator"));
             }
             message.append(links.get(index));
         }
@@ -510,19 +530,20 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
                 .hud
                 .getChat()
                 .addClientSystemMessage(
-                        Component.literal(
-                                        "[Texture Atlas Generator] Export failed: "
-                                                + describe(error))
+                        Component.translatable("textureatlasgenerator.chat.prefix")
+                                .append(
+                                        Component.translatable(
+                                                "textureatlasgenerator.export_failed",
+                                                describe(error)))
                                 .withStyle(style -> style.withColor(0xFF7070)));
     }
 
     private static Component openFileLink(Path path) {
-        return openLink(path, path.getFileName().toString());
+        return openLink(path, Component.literal(path.getFileName().toString()));
     }
 
-    private static Component openLink(Path path, String text) {
-        return Component.literal(text)
-                .withStyle(
+    private static Component openLink(Path path, MutableComponent text) {
+        return text.withStyle(
                         style ->
                                 style.withUnderlined(true)
                                         .withClickEvent(new ClickEvent.OpenFile(path)));

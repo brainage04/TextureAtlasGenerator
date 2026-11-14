@@ -10,6 +10,7 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
@@ -27,7 +28,7 @@ public final class AtlasPreview implements AutoCloseable {
     private int generation;
     private List<ItemStack> stacks;
     private PlayerHeadSkins skins;
-    private String problem;
+    private Component problem;
     private boolean closed;
 
     private int[] wanted = new int[0];
@@ -69,7 +70,7 @@ public final class AtlasPreview implements AutoCloseable {
         shownPixels = Math.max(1, displayPixels);
     }
 
-    public String status() {
+    public Component status() {
         return problem;
     }
 
@@ -218,7 +219,7 @@ public final class AtlasPreview implements AutoCloseable {
             return;
         }
         failed = true;
-        problem = "Preview failed: " + message(error);
+        problem = Component.translatable("textureatlasgenerator.preview.failed", message(error));
         TextureAtlasGenerator.LOGGER.error("Rendering the atlas preview failed", error);
     }
 

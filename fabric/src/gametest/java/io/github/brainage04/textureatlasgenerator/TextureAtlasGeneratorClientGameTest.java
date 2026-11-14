@@ -327,7 +327,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         ClientGameTestRecorder.showStep(
                 context,
                 "texture_atlas." + kind.fileStem() + ".exporting",
-                kind.displayName() + " export",
+                kind.displayName().getString() + " export",
                 command + " renders the atlas and shows its progress");
         List<Path> outputs = outputs(context, AtlasExporter.fileBase(kind, PIXEL_SIZE), EXTENSIONS);
         try {
@@ -351,7 +351,7 @@ public final class TextureAtlasGeneratorClientGameTest implements FabricClientGa
         ClientGameTestRecorder.showStep(
                 context,
                 "texture_atlas." + kind.fileStem() + ".saved",
-                kind.displayName() + " atlas saved",
+                kind.displayName().getString() + " atlas saved",
                 "The WebP and its JSON, text and CSS mappings have been written");
         context.waitTicks(20);
         context.takeScreenshot("texture-atlas-" + kind.fileStem() + "-saved");
