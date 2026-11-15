@@ -76,7 +76,8 @@ public final class PngStreamWriter implements AutoCloseable {
         closed = true;
         try {
             if (rowsWritten != height) {
-                throw new IllegalStateException("PNG closed after " + rowsWritten + " of " + height + " rows");
+                throw new IllegalStateException(
+                        "PNG closed after " + rowsWritten + " of " + height + " rows");
             }
             writeChunk("IEND", new byte[0], 0);
         } finally {
@@ -110,13 +111,14 @@ public final class PngStreamWriter implements AutoCloseable {
                 int left = i >= 4 ? rgba[start + i - 4] & 0xFF : 0;
                 int up = prior[i] & 0xFF;
                 int upLeft = i >= 4 ? prior[i - 4] & 0xFF : 0;
-                int value = switch (filter) {
-                    case 0 -> raw;
-                    case 1 -> raw - left;
-                    case 2 -> raw - up;
-                    case 3 -> raw - ((left + up) >>> 1);
-                    default -> raw - paeth(left, up, upLeft);
-                };
+                int value =
+                        switch (filter) {
+                            case 0 -> raw;
+                            case 1 -> raw - left;
+                            case 2 -> raw - up;
+                            case 3 -> raw - ((left + up) >>> 1);
+                            default -> raw - paeth(left, up, upLeft);
+                        };
                 byte encoded = (byte) value;
                 target[i + 1] = encoded;
                 score += Math.abs(encoded);

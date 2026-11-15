@@ -29,15 +29,23 @@ final class Vp8lEncoder {
 
     /** RFC 9649 distance map: (xi, yi) for distance codes 1..120. */
     private static final int[] DISTANCE_MAP = {
-        0, 1, 1, 0, 1, 1, -1, 1, 0, 2, 2, 0, 1, 2, -1, 2, 2, 1, -2, 1, 2, 2, -2, 2, 0, 3, 3, 0, 1, 3, -1, 3,
-        3, 1, -3, 1, 2, 3, -2, 3, 3, 2, -3, 2, 0, 4, 4, 0, 1, 4, -1, 4, 4, 1, -4, 1, 3, 3, -3, 3, 2, 4, -2, 4,
-        4, 2, -4, 2, 0, 5, 3, 4, -3, 4, 4, 3, -4, 3, 5, 0, 1, 5, -1, 5, 5, 1, -5, 1, 2, 5, -2, 5, 5, 2, -5, 2,
-        4, 4, -4, 4, 3, 5, -3, 5, 5, 3, -5, 3, 0, 6, 6, 0, 1, 6, -1, 6, 6, 1, -6, 1, 2, 6, -2, 6, 6, 2, -6, 2,
-        4, 5, -4, 5, 5, 4, -5, 4, 3, 6, -3, 6, 6, 3, -6, 3, 0, 7, 7, 0, 1, 7, -1, 7, 5, 5, -5, 5, 7, 1, -7, 1,
-        4, 6, -4, 6, 6, 4, -6, 4, 2, 7, -2, 7, 7, 2, -7, 2, 3, 7, -3, 7, 7, 3, -7, 3, 5, 6, -5, 6, 6, 5, -6, 5,
-        8, 0, 4, 7, -4, 7, 7, 4, -7, 4, 8, 1, 8, 2, 6, 6, -6, 6, 8, 3, 5, 7, -5, 7, 7, 5, -7, 5, 8, 4, 6, 7,
+        0, 1, 1, 0, 1, 1, -1, 1, 0, 2, 2, 0, 1, 2, -1, 2, 2, 1, -2, 1, 2, 2, -2, 2, 0, 3, 3, 0, 1,
+                3, -1, 3,
+        3, 1, -3, 1, 2, 3, -2, 3, 3, 2, -3, 2, 0, 4, 4, 0, 1, 4, -1, 4, 4, 1, -4, 1, 3, 3, -3, 3, 2,
+                4, -2, 4,
+        4, 2, -4, 2, 0, 5, 3, 4, -3, 4, 4, 3, -4, 3, 5, 0, 1, 5, -1, 5, 5, 1, -5, 1, 2, 5, -2, 5, 5,
+                2, -5, 2,
+        4, 4, -4, 4, 3, 5, -3, 5, 5, 3, -5, 3, 0, 6, 6, 0, 1, 6, -1, 6, 6, 1, -6, 1, 2, 6, -2, 6, 6,
+                2, -6, 2,
+        4, 5, -4, 5, 5, 4, -5, 4, 3, 6, -3, 6, 6, 3, -6, 3, 0, 7, 7, 0, 1, 7, -1, 7, 5, 5, -5, 5, 7,
+                1, -7, 1,
+        4, 6, -4, 6, 6, 4, -6, 4, 2, 7, -2, 7, 7, 2, -7, 2, 3, 7, -3, 7, 7, 3, -7, 3, 5, 6, -5, 6,
+                6, 5, -6, 5,
+        8, 0, 4, 7, -4, 7, 7, 4, -7, 4, 8, 1, 8, 2, 6, 6, -6, 6, 8, 3, 5, 7, -5, 7, 7, 5, -7, 5, 8,
+                4, 6, 7,
         -6, 7, 7, 6, -7, 6, 8, 5, 7, 7, -7, 7, 8, 6, 8, 7
     };
+
     private static final int[] PLANE_CODES = new int[8 * 17];
 
     static {
@@ -51,7 +59,8 @@ final class Vp8lEncoder {
     /** {@code argb} is overwritten with residuals. */
     static void encode(BitWriter out, int[] argb, int width, int height) throws IOException {
         if (width < 1 || height < 1 || width > MAX_DIMENSION || height > MAX_DIMENSION) {
-            throw new IllegalArgumentException("WebP images are limited to " + MAX_DIMENSION + " px per side");
+            throw new IllegalArgumentException(
+                    "WebP images are limited to " + MAX_DIMENSION + " px per side");
         }
         boolean alpha = false;
         for (int pixel : argb) {
@@ -70,7 +79,8 @@ final class Vp8lEncoder {
         out.write(1, 1);
         out.write(2, 2);
         if (repeatRatio(argb, width) > 0.5) {
-            // Pixel art and upscaled cells repeat exactly; LZ77 codes raw pixels far better than residuals.
+            // Pixel art and upscaled cells repeat exactly; LZ77 codes raw pixels far better than
+            // residuals.
             out.write(0, 1);
             writeImage(out, argb, width, height, true);
             return;
@@ -164,8 +174,15 @@ final class Vp8lEncoder {
                 } else if (x == 0) {
                     prediction = argb[(y - 1) * width];
                 } else {
-                    prediction = predict(argb, width, x, y,
-                            modes[(y >> PREDICTOR_BITS) * tilesWide + (x >> PREDICTOR_BITS)]);
+                    prediction =
+                            predict(
+                                    argb,
+                                    width,
+                                    x,
+                                    y,
+                                    modes[
+                                            (y >> PREDICTOR_BITS) * tilesWide
+                                                    + (x >> PREDICTOR_BITS)]);
                 }
                 argb[y * width + x] = subtract(argb[y * width + x], prediction);
             }
@@ -241,7 +258,8 @@ final class Vp8lEncoder {
         return result;
     }
 
-    private static void writeImage(BitWriter out, int[] pixels, int width, int height, boolean main) throws IOException {
+    private static void writeImage(BitWriter out, int[] pixels, int width, int height, boolean main)
+            throws IOException {
         int cacheBits = main ? CACHE_BITS : 0;
         if (cacheBits > 0) {
             out.write(1, 1);
@@ -255,42 +273,46 @@ final class Vp8lEncoder {
         int tilesWide = Math.ceilDiv(width, 1 << tileBits);
         int tileCount = main ? tilesWide * Math.ceilDiv(height, 1 << tileBits) : 1;
         int[][] tileHistograms = new int[tileCount][];
-        TokenSink counter = new TokenSink() {
-            private int[] histogram(int position) {
-                int tile = main ? tileOf(position, width, tileBits, tilesWide) : 0;
-                int[] histogram = tileHistograms[tile];
-                if (histogram == null) {
-                    histogram = new int[layout.size];
-                    tileHistograms[tile] = histogram;
-                }
-                return histogram;
-            }
+        TokenSink counter =
+                new TokenSink() {
+                    private int[] histogram(int position) {
+                        int tile = main ? tileOf(position, width, tileBits, tilesWide) : 0;
+                        int[] histogram = tileHistograms[tile];
+                        if (histogram == null) {
+                            histogram = new int[layout.size];
+                            tileHistograms[tile] = histogram;
+                        }
+                        return histogram;
+                    }
 
-            @Override
-            public void literal(int position, int argb) {
-                int[] histogram = histogram(position);
-                histogram[(argb >>> 8) & 0xFF]++;
-                histogram[layout.red + ((argb >>> 16) & 0xFF)]++;
-                histogram[layout.blue + (argb & 0xFF)]++;
-                histogram[layout.alpha + (argb >>> 24)]++;
-            }
+                    @Override
+                    public void literal(int position, int argb) {
+                        int[] histogram = histogram(position);
+                        histogram[(argb >>> 8) & 0xFF]++;
+                        histogram[layout.red + ((argb >>> 16) & 0xFF)]++;
+                        histogram[layout.blue + (argb & 0xFF)]++;
+                        histogram[layout.alpha + (argb >>> 24)]++;
+                    }
 
-            @Override
-            public void cache(int position, int index) {
-                histogram(position)[256 + NUM_LENGTH_CODES + index]++;
-            }
+                    @Override
+                    public void cache(int position, int index) {
+                        histogram(position)[256 + NUM_LENGTH_CODES + index]++;
+                    }
 
-            @Override
-            public void copy(int position, int length, int distanceCode) {
-                int[] histogram = histogram(position);
-                histogram[256 + prefix(length)]++;
-                histogram[layout.distance + prefix(distanceCode)]++;
-            }
-        };
+                    @Override
+                    public void copy(int position, int length, int distanceCode) {
+                        int[] histogram = histogram(position);
+                        histogram[256 + prefix(length)]++;
+                        histogram[layout.distance + prefix(distanceCode)]++;
+                    }
+                };
         tokenize(pixels, width, main, cacheBits, counter);
 
         int[] tileGroup = new int[tileCount];
-        List<int[]> groups = main ? cluster(tileHistograms, layout, tileGroup) : singleGroup(tileHistograms, layout);
+        List<int[]> groups =
+                main
+                        ? cluster(tileHistograms, layout, tileGroup)
+                        : singleGroup(tileHistograms, layout);
         if (main) {
             if (groups.size() > 1) {
                 out.write(1, 1);
@@ -314,46 +336,50 @@ final class Vp8lEncoder {
             }
         }
         IOException[] failure = new IOException[1];
-        TokenSink writer = new TokenSink() {
-            private PrefixCode[] codes(int position) {
-                return codes[main && groups.size() > 1 ? tileGroup[tileOf(position, width, tileBits, tilesWide)] : 0];
-            }
+        TokenSink writer =
+                new TokenSink() {
+                    private PrefixCode[] codes(int position) {
+                        return codes[
+                                main && groups.size() > 1
+                                        ? tileGroup[tileOf(position, width, tileBits, tilesWide)]
+                                        : 0];
+                    }
 
-            @Override
-            public void literal(int position, int argb) {
-                PrefixCode[] group = codes(position);
-                try {
-                    group[0].writeSymbol(out, (argb >>> 8) & 0xFF);
-                    group[1].writeSymbol(out, (argb >>> 16) & 0xFF);
-                    group[2].writeSymbol(out, argb & 0xFF);
-                    group[3].writeSymbol(out, argb >>> 24);
-                } catch (IOException error) {
-                    failure[0] = error;
-                }
-            }
+                    @Override
+                    public void literal(int position, int argb) {
+                        PrefixCode[] group = codes(position);
+                        try {
+                            group[0].writeSymbol(out, (argb >>> 8) & 0xFF);
+                            group[1].writeSymbol(out, (argb >>> 16) & 0xFF);
+                            group[2].writeSymbol(out, argb & 0xFF);
+                            group[3].writeSymbol(out, argb >>> 24);
+                        } catch (IOException error) {
+                            failure[0] = error;
+                        }
+                    }
 
-            @Override
-            public void cache(int position, int index) {
-                try {
-                    codes(position)[0].writeSymbol(out, 256 + NUM_LENGTH_CODES + index);
-                } catch (IOException error) {
-                    failure[0] = error;
-                }
-            }
+                    @Override
+                    public void cache(int position, int index) {
+                        try {
+                            codes(position)[0].writeSymbol(out, 256 + NUM_LENGTH_CODES + index);
+                        } catch (IOException error) {
+                            failure[0] = error;
+                        }
+                    }
 
-            @Override
-            public void copy(int position, int length, int distanceCode) {
-                PrefixCode[] group = codes(position);
-                try {
-                    group[0].writeSymbol(out, 256 + prefix(length));
-                    writeExtraBits(out, length);
-                    group[4].writeSymbol(out, prefix(distanceCode));
-                    writeExtraBits(out, distanceCode);
-                } catch (IOException error) {
-                    failure[0] = error;
-                }
-            }
-        };
+                    @Override
+                    public void copy(int position, int length, int distanceCode) {
+                        PrefixCode[] group = codes(position);
+                        try {
+                            group[0].writeSymbol(out, 256 + prefix(length));
+                            writeExtraBits(out, length);
+                            group[4].writeSymbol(out, prefix(distanceCode));
+                            writeExtraBits(out, distanceCode);
+                        } catch (IOException error) {
+                            failure[0] = error;
+                        }
+                    }
+                };
         tokenize(pixels, width, main, cacheBits, writer);
         if (failure[0] != null) {
             throw failure[0];
@@ -368,7 +394,8 @@ final class Vp8lEncoder {
 
     private static int tileBits(int width, int height) {
         int bits = 3;
-        while (bits < 9 && (long) Math.ceilDiv(width, 1 << bits) * Math.ceilDiv(height, 1 << bits) > 4096) {
+        while (bits < 9
+                && (long) Math.ceilDiv(width, 1 << bits) * Math.ceilDiv(height, 1 << bits) > 4096) {
             bits++;
         }
         return bits;
@@ -376,7 +403,13 @@ final class Vp8lEncoder {
 
     private record Layout(int green, int red, int blue, int alpha, int distance, int size) {
         Layout(int greenSize) {
-            this(0, greenSize, greenSize + 256, greenSize + 512, greenSize + 768, greenSize + 768 + NUM_DISTANCE_CODES);
+            this(
+                    0,
+                    greenSize,
+                    greenSize + 256,
+                    greenSize + 512,
+                    greenSize + 768,
+                    greenSize + 768 + NUM_DISTANCE_CODES);
         }
 
         int start(int part) {
@@ -426,7 +459,14 @@ final class Vp8lEncoder {
             int best = -1;
             double bestDelta = alone;
             for (int group = 0; group < groups.size(); group++) {
-                double delta = mergeDelta(groups.get(group), stats.get(group), histogram, nonZero, used, layout);
+                double delta =
+                        mergeDelta(
+                                groups.get(group),
+                                stats.get(group),
+                                histogram,
+                                nonZero,
+                                used,
+                                layout);
                 if (delta < bestDelta || (groups.size() >= MAX_GROUPS && best < 0)) {
                     bestDelta = delta;
                     best = group;
@@ -464,7 +504,8 @@ final class Vp8lEncoder {
         return cost;
     }
 
-    private static double mergeDelta(int[] group, double[] stats, int[] histogram, int[] nonZero, int used, Layout layout) {
+    private static double mergeDelta(
+            int[] group, double[] stats, int[] histogram, int[] nonZero, int used, Layout layout) {
         double[] total = new double[5];
         double[] sum = new double[5];
         double[] newUsed = new double[5];
@@ -494,7 +535,8 @@ final class Vp8lEncoder {
         return after - before;
     }
 
-    private static void add(int[] group, double[] stats, int[] histogram, int[] nonZero, int used, Layout layout) {
+    private static void add(
+            int[] group, double[] stats, int[] histogram, int[] nonZero, int used, Layout layout) {
         for (int index = 0; index < used; index++) {
             int symbol = nonZero[index];
             int part = partOf(symbol, layout);
@@ -545,12 +587,18 @@ final class Vp8lEncoder {
         void copy(int position, int length, int distanceCode);
     }
 
-    private static void tokenize(int[] pixels, int width, boolean lz77, int cacheBits, TokenSink sink) {
+    private static void tokenize(
+            int[] pixels, int width, boolean lz77, int cacheBits, TokenSink sink) {
         int size = pixels.length;
         int[] cache = cacheBits > 0 ? new int[1 << cacheBits] : null;
         int cacheShift = 32 - cacheBits;
         int[] head = lz77 ? new int[1 << HASH_BITS] : null;
-        int[] chain = lz77 ? new int[Math.min(WINDOW, Integer.highestOneBit(Math.max(1, size - 1)) << 1)] : null;
+        int[] chain =
+                lz77
+                        ? new int
+                                [Math.min(
+                                        WINDOW, Integer.highestOneBit(Math.max(1, size - 1)) << 1)]
+                        : null;
         int chainMask = lz77 ? chain.length - 1 : 0;
         if (lz77) {
             Arrays.fill(head, -1);
@@ -575,7 +623,9 @@ final class Vp8lEncoder {
                 }
                 int hash = hash(pixels, position);
                 int candidate = head[hash];
-                for (int steps = 0; candidate >= 0 && steps < MAX_CHAIN && bestLength < maxLength; steps++) {
+                for (int steps = 0;
+                        candidate >= 0 && steps < MAX_CHAIN && bestLength < maxLength;
+                        steps++) {
                     int distance = position - candidate;
                     if (distance > MAX_DISTANCE || distance > chain.length - 1) {
                         break;
@@ -622,8 +672,12 @@ final class Vp8lEncoder {
     }
 
     private static int hash(int[] pixels, int index) {
-        long key = (pixels[index] * 0x9E3779B1L) ^ (pixels[index + 1] * 0x85EBCA77L) ^ (pixels[index + 2] * 0xC2B2AE3DL);
-        return (int) ((key ^ (key >>> 29)) * 0x165667B1L >>> (64 - HASH_BITS)) & ((1 << HASH_BITS) - 1);
+        long key =
+                (pixels[index] * 0x9E3779B1L)
+                        ^ (pixels[index + 1] * 0x85EBCA77L)
+                        ^ (pixels[index + 2] * 0xC2B2AE3DL);
+        return (int) ((key ^ (key >>> 29)) * 0x165667B1L >>> (64 - HASH_BITS))
+                & ((1 << HASH_BITS) - 1);
     }
 
     private static int matchLength(int[] pixels, int position, int candidate, int maxLength) {

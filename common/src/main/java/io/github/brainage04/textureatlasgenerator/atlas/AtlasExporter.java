@@ -2,12 +2,7 @@ package io.github.brainage04.textureatlasgenerator.atlas;
 
 import com.google.gson.JsonObject;
 import io.github.brainage04.textureatlasgenerator.TextureAtlasGenerator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.Util;
-import net.minecraft.world.item.ItemStack;
-
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -19,11 +14,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
+import net.minecraft.world.item.ItemStack;
 
 /**
- * Renders in horizontal bands and splits a large atlas into square pages of at most
- * {@link AtlasLayout#MAX_PAGE_SIDE}, writing a streamed PNG when the heap cannot hold a WebP page,
- * so neither an image nor a GPU render target has to be huge.
+ * Renders in horizontal bands and splits a large atlas into square pages of at most {@link
+ * AtlasLayout#MAX_PAGE_SIDE}, writing a streamed PNG when the heap cannot hold a WebP page, so
+ * neither an image nor a GPU render target has to be huge.
  */
 public final class AtlasExporter {
     public static final int MIN_PIXEL_SIZE = 1;
@@ -81,11 +79,11 @@ public final class AtlasExporter {
         return kind.fileStem() + '_' + pixelSize + 'x' + pixelSize;
     }
 
-    public static boolean start(Minecraft client, AtlasKind kind, int pixelSize, Listener listener) {
+    public static boolean start(
+            Minecraft client, AtlasKind kind, int pixelSize, Listener listener) {
         if (pixelSize < MIN_PIXEL_SIZE || pixelSize > MAX_PIXEL_SIZE) {
             throw new IllegalArgumentException(
-                    "Pixel size must be between " + MIN_PIXEL_SIZE + " and " + MAX_PIXEL_SIZE
-            );
+                    "Pixel size must be between " + MIN_PIXEL_SIZE + " and " + MAX_PIXEL_SIZE);
         }
         if (!EXPORTING.compareAndSet(false, true)) {
             return false;
@@ -128,21 +126,45 @@ public final class AtlasExporter {
             return;
         }
         progress(Stage.DOWNLOADING_SKINS, 0, entries.size(), "Downloading player-head textures…");
-        skins.preload(completed -> {
-            if (completed == 1 || completed % 16 == 0) {
-                progress(Stage.DOWNLOADING_SKINS, completed, entries.size(), "Downloading player-head textures…");
-            }
-        }).whenComplete((ignored, error) -> client.schedule(() -> run(() -> {
-            if (error != null) {
-                throw error instanceof RuntimeException runtime ? runtime : new IllegalStateException(error);
-            }
-            openPage(0);
-        })));
+        skins.preload(
+                        completed -> {
+                            if (completed == 1 || completed % 16 == 0) {
+                                progress(
+                                        Stage.DOWNLOADING_SKINS,
+                                        completed,
+                                        entries.size(),
+                                        "Downloading player-head textures…");
+                            }
+                        })
+                .whenComplete(
+                        (ignored, error) ->
+                                client.schedule(
+                                        () ->
+                                                run(
+                                                        () -> {
+                                                            if (error != null) {
+                                                                throw error
+                                                                                instanceof
+                                                                                RuntimeException
+                                                                                        runtime
+                                                                        ? runtime
+                                                                        : new IllegalStateException(
+                                                                                error);
+                                                            }
+                                                            openPage(0);
+                                                        })));
     }
 
     private void deleteStaleImages(List<String> current) throws IOException {
-        Pattern ours = Pattern.compile(Pattern.quote(fileBase) + "(_\\d+)?\\.(" + Arrays.stream(AtlasImage.Format.values())
-                .map(AtlasImage.Format::extension).reduce((a, b) -> a + '|' + b).orElseThrow() + ")");
+        Pattern ours =
+                Pattern.compile(
+                        Pattern.quote(fileBase)
+                                + "(_\\d+)?\\.("
+                                + Arrays.stream(AtlasImage.Format.values())
+                                        .map(AtlasImage.Format::extension)
+                                        .reduce((a, b) -> a + '|' + b)
+                                        .orElseThrow()
+                                + ")");
         try (Stream<Path> files = Files.list(outputDirectory)) {
             for (Path file : files.toList()) {
                 String name = file.getFileName().toString();
@@ -192,24 +214,55 @@ public final class AtlasExporter {
         int xOffset = tileColumn * pixelSize * 4;
         if (tileEntries.isEmpty()) {
             for (int y = 0; y < tileRows * pixelSize; y++) {
-                Arrays.fill(band, y * side * 4 + xOffset, y * side * 4 + xOffset + tileWidth * pixelSize * 4, (byte) 0);
+                Arrays.fill(
+                        band,
+                        y * side * 4 + xOffset,
+                        y * side * 4 + xOffset + tileWidth * pixelSize * 4,
+                        (byte) 0);
             }
             advance();
             return;
         }
 
         long done = page.firstEntry() + Math.min(page.entryCount(), (long) firstRow * columns);
-        progress(Stage.RENDERING, done, entries.size(), layout.pages().size() == 1
-                ? "Rendering item models…"
-                : "Rendering page " + (pageIndex + 1) + " of " + layout.pages().size() + "…");
-        Runnable render = () -> renderer.renderPage(tileStacks, tileWidth, tileRows, renderSize,
-                (pixels, width, height, error) -> run(() -> {
-                    if (error != null) {
-                        throw error instanceof RuntimeException runtime ? runtime : new IllegalStateException(error);
-                    }
-                    AtlasItemRenderer.downsample(pixels, width, height, renderSize / pixelSize, band, side * 4, xOffset);
-                    advance();
-                }));
+        progress(
+                Stage.RENDERING,
+                done,
+                entries.size(),
+                layout.pages().size() == 1
+                        ? "Rendering item models…"
+                        : "Rendering page "
+                                + (pageIndex + 1)
+                                + " of "
+                                + layout.pages().size()
+                                + "…");
+        Runnable render =
+                () ->
+                        renderer.renderPage(
+                                tileStacks,
+                                tileWidth,
+                                tileRows,
+                                renderSize,
+                                (pixels, width, height, error) ->
+                                        run(
+                                                () -> {
+                                                    if (error != null) {
+                                                        throw error
+                                                                        instanceof
+                                                                        RuntimeException runtime
+                                                                ? runtime
+                                                                : new IllegalStateException(error);
+                                                    }
+                                                    AtlasItemRenderer.downsample(
+                                                            pixels,
+                                                            width,
+                                                            height,
+                                                            renderSize / pixelSize,
+                                                            band,
+                                                            side * 4,
+                                                            xOffset);
+                                                    advance();
+                                                }));
         if (skins != null) {
             skins.whenReady(tileEntries, render, this::fail);
         } else {
@@ -228,17 +281,19 @@ public final class AtlasExporter {
         boolean lastBand = bandIndex + 1 == bandCount;
         AtlasImage current = image;
         byte[] rows = band;
-        Util.ioPool().execute(() -> {
-            try {
-                current.writeRows(rows, 0, bandHeight);
-                if (lastBand) {
-                    current.finish();
-                }
-                client.schedule(() -> run(this::nextBand));
-            } catch (Throwable error) {
-                client.schedule(() -> fail(error));
-            }
-        });
+        Util.ioPool()
+                .execute(
+                        () -> {
+                            try {
+                                current.writeRows(rows, 0, bandHeight);
+                                if (lastBand) {
+                                    current.finish();
+                                }
+                                client.schedule(() -> run(this::nextBand));
+                            } catch (Throwable error) {
+                                client.schedule(() -> fail(error));
+                            }
+                        });
     }
 
     private void nextBand() throws IOException {
@@ -268,39 +323,60 @@ public final class AtlasExporter {
             imageNames.add(layout.imageFileName(fileBase, index, extension));
         }
         AtlasMappings mappings = new AtlasMappings(kind, entries, layout, imageNames, extra);
-        Util.ioPool().execute(() -> {
-            List<Path> temporaryMappings = List.of(
-                    outputDirectory.resolve(fileBase + ".json.tmp"),
-                    outputDirectory.resolve(fileBase + ".txt.tmp"),
-                    outputDirectory.resolve(fileBase + ".css.tmp"));
-            try {
-                Path json = outputDirectory.resolve(fileBase + ".json");
-                Path text = outputDirectory.resolve(fileBase + ".txt");
-                Path css = outputDirectory.resolve(fileBase + ".css");
-                writeTemporary(temporaryMappings.get(0), mappings.json());
-                writeTemporary(temporaryMappings.get(1), mappings.text());
-                writeTemporary(temporaryMappings.get(2), mappings.css());
-                List<Path> images = new ArrayList<>();
-                for (int index = 0; index < imageNames.size(); index++) {
-                    Path imagePath = outputDirectory.resolve(imageNames.get(index));
-                    replace(temporaryImages.get(index), imagePath);
-                    images.add(imagePath);
-                }
-                replace(temporaryMappings.get(0), json);
-                replace(temporaryMappings.get(1), text);
-                replace(temporaryMappings.get(2), css);
-                deleteStaleImages(imageNames);
-                int pageSide = layout.pages().getFirst().side(pixelSize);
-                String summary = entries.size() + " items ("
-                        + (images.size() == 1 ? pageSide + "x" + pageSide + " px" : images.size() + " pages of up to " + pageSide + "x" + pageSide + " px")
-                        + (format.fallbackReason() == null ? "" : ", PNG because " + format.fallbackReason()) + ")";
-                Result result = new Result(summary, List.copyOf(images), List.of(json, text, css), outputDirectory);
-                client.schedule(() -> finish(result, null));
-            } catch (Throwable error) {
-                temporaryMappings.forEach(AtlasExporter::deleteQuietly);
-                client.schedule(() -> fail(error));
-            }
-        });
+        Util.ioPool()
+                .execute(
+                        () -> {
+                            List<Path> temporaryMappings =
+                                    List.of(
+                                            outputDirectory.resolve(fileBase + ".json.tmp"),
+                                            outputDirectory.resolve(fileBase + ".txt.tmp"),
+                                            outputDirectory.resolve(fileBase + ".css.tmp"));
+                            try {
+                                Path json = outputDirectory.resolve(fileBase + ".json");
+                                Path text = outputDirectory.resolve(fileBase + ".txt");
+                                Path css = outputDirectory.resolve(fileBase + ".css");
+                                writeTemporary(temporaryMappings.get(0), mappings.json());
+                                writeTemporary(temporaryMappings.get(1), mappings.text());
+                                writeTemporary(temporaryMappings.get(2), mappings.css());
+                                List<Path> images = new ArrayList<>();
+                                for (int index = 0; index < imageNames.size(); index++) {
+                                    Path imagePath = outputDirectory.resolve(imageNames.get(index));
+                                    replace(temporaryImages.get(index), imagePath);
+                                    images.add(imagePath);
+                                }
+                                replace(temporaryMappings.get(0), json);
+                                replace(temporaryMappings.get(1), text);
+                                replace(temporaryMappings.get(2), css);
+                                deleteStaleImages(imageNames);
+                                int pageSide = layout.pages().getFirst().side(pixelSize);
+                                String summary =
+                                        entries.size()
+                                                + " items ("
+                                                + (images.size() == 1
+                                                        ? pageSide + "x" + pageSide + " px"
+                                                        : images.size()
+                                                                + " pages of up to "
+                                                                + pageSide
+                                                                + "x"
+                                                                + pageSide
+                                                                + " px")
+                                                + (format.fallbackReason() == null
+                                                        ? ""
+                                                        : ", PNG because "
+                                                                + format.fallbackReason())
+                                                + ")";
+                                Result result =
+                                        new Result(
+                                                summary,
+                                                List.copyOf(images),
+                                                List.of(json, text, css),
+                                                outputDirectory);
+                                client.schedule(() -> finish(result, null));
+                            } catch (Throwable error) {
+                                temporaryMappings.forEach(AtlasExporter::deleteQuietly);
+                                client.schedule(() -> fail(error));
+                            }
+                        });
     }
 
     static void writeTemporary(Path temporary, String contents) throws IOException {
@@ -309,7 +385,11 @@ public final class AtlasExporter {
 
     static void replace(Path source, Path destination) throws IOException {
         try {
-            Files.move(source, destination, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(
+                    source,
+                    destination,
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
         } catch (AtomicMoveNotSupportedException ignored) {
             Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
         }

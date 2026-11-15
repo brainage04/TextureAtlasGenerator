@@ -6,11 +6,15 @@ import java.util.Arrays;
 import java.util.List;
 
 final class PrefixCode {
-    private static final int[] CODE_LENGTH_ORDER = {17, 18, 0, 1, 2, 3, 4, 5, 16, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    private static final int[] CODE_LENGTH_ORDER = {
+        17, 18, 0, 1, 2, 3, 4, 5, 16, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+    };
 
     private final int[] lengths;
+
     /** Bit-reversed canonical codes, ready to be written least-significant bit first. */
     private final int[] codes;
+
     /** A single used symbol costs zero bits. */
     private final boolean singleSymbol;
 
@@ -93,14 +97,15 @@ final class PrefixCode {
                 case 16 -> out.write(token[1] - 3, 2);
                 case 17 -> out.write(token[1] - 3, 3);
                 case 18 -> out.write(token[1] - 11, 7);
-                default -> {
-                }
+                default -> {}
             }
         }
     }
 
     private int[] usedSymbols() {
-        return java.util.stream.IntStream.range(0, lengths.length).filter(symbol -> lengths[symbol] > 0).toArray();
+        return java.util.stream.IntStream.range(0, lengths.length)
+                .filter(symbol -> lengths[symbol] > 0)
+                .toArray();
     }
 
     /** Encodes code lengths with the repeat codes 16 (previous non-zero), 17 and 18 (zeros). */
@@ -187,7 +192,12 @@ final class PrefixCode {
         for (int symbol = 0; symbol < histogram.length; symbol++) {
             order[symbol] = symbol;
         }
-        Arrays.sort(order, (a, b) -> histogram[a] != histogram[b] ? Integer.compare(histogram[a], histogram[b]) : Integer.compare(a, b));
+        Arrays.sort(
+                order,
+                (a, b) ->
+                        histogram[a] != histogram[b]
+                                ? Integer.compare(histogram[a], histogram[b])
+                                : Integer.compare(a, b));
         int leaf = 0;
         for (int symbol : order) {
             if (histogram[symbol] > 0) {
@@ -211,8 +221,10 @@ final class PrefixCode {
             int leafIndex = 0;
             int packageIndex = 0;
             for (int out = 0; out < merged.length; out++) {
-                long packageWeight = packageIndex < packages
-                        ? previous[2 * packageIndex] + previous[2 * packageIndex + 1] : Long.MAX_VALUE;
+                long packageWeight =
+                        packageIndex < packages
+                                ? previous[2 * packageIndex] + previous[2 * packageIndex + 1]
+                                : Long.MAX_VALUE;
                 if (leafIndex < used && leafWeights[leafIndex] <= packageWeight) {
                     merged[out] = leafWeights[leafIndex];
                     mergedChildren[out] = new int[] {-1, leafIndex};

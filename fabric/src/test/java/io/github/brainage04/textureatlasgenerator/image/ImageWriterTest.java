@@ -1,14 +1,17 @@
 package io.github.brainage04.textureatlasgenerator.image;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
+import javax.imageio.ImageIO;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class ImageWriterTest {
     @TempDir Path directory;
@@ -45,12 +48,16 @@ class ImageWriterTest {
                 int[] expected = pixels(width, height, kind);
                 if (kind == 0) java.util.Arrays.fill(expected, 0xFF42A080);
                 if (kind == 1) {
-                    for (int i = 0; i < expected.length; i++) expected[i] = (i % 3 == 0 ? 0x7F123456 : 0xFF00FF00);
+                    for (int i = 0; i < expected.length; i++)
+                        expected[i] = (i % 3 == 0 ? 0x7F123456 : 0xFF00FF00);
                 }
                 if (kind == 2) {
-                    for (int i = 0; i < expected.length; i++) expected[i] = 0xFF000000 | ((i % width * 7 & 255) << 16) | (i / width * 5 & 255);
+                    for (int i = 0; i < expected.length; i++)
+                        expected[i] =
+                                0xFF000000 | ((i % width * 7 & 255) << 16) | (i / width * 5 & 255);
                 }
-                Path path = directory.resolve("image-" + width + '-' + height + '-' + kind + ".webp");
+                Path path =
+                        directory.resolve("image-" + width + '-' + height + '-' + kind + ".webp");
                 WebPWriter.writeStill(path, expected.clone(), width, height);
                 assertPixels(path, expected, width, height);
             }
@@ -76,11 +83,13 @@ class ImageWriterTest {
         return result;
     }
 
-    private static void assertPixels(Path path, int[] expected, int width, int height) throws Exception {
+    private static void assertPixels(Path path, int[] expected, int width, int height)
+            throws Exception {
         BufferedImage decoded = ImageIO.read(path.toFile());
         assertNotNull(decoded, "No decoder for " + path);
         assertEquals(width, decoded.getWidth());
         assertEquals(height, decoded.getHeight());
-        assertArrayEquals(expected, decoded.getRGB(0, 0, width, height, null, 0, width), path.toString());
+        assertArrayEquals(
+                expected, decoded.getRGB(0, 0, width, height, null, 0, width), path.toString());
     }
 }
