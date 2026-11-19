@@ -37,7 +37,6 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
     private int pixelSize = AtlasExporter.DEFAULT_PIXEL_SIZE;
     private List<AtlasCatalog.Entry> catalog = List.of();
     private AtlasKind catalogKind;
-    /** Catalog indexes of the entries matching the search. */
     private int[] filtered = new int[0];
     private AtlasPreview preview;
     private int scrollRow;
@@ -74,13 +73,11 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
         exportOnOpen = true;
     }
 
-    /** Exports the enchantment glint loop at {@code requestedPixelSize} once the screen opens. */
     public void startGlintExportOnOpen(int requestedPixelSize) {
         setPixelSize(requestedPixelSize);
         glintExportOnOpen = pixelSize;
     }
 
-    /** Points the preview at the selected atlas and pixel size. */
     private void configurePreview() {
         if (preview != null && !catalog.isEmpty()) {
             preview.configure(selectedKind, catalog, pixelSize);
@@ -217,7 +214,6 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
         updateControls();
     }
 
-    /** Accepts a typed size once it is a whole number in range; anything else disables export. */
     private void onSizeTyped(String value) {
         if (value.matches("\\d{1,4}")) {
             int typed = Integer.parseInt(value);
@@ -357,7 +353,6 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
             int completedWidth = barWidth * progress.percentage() / 100;
             graphics.fill(barLeft, bottom - 3, barLeft + completedWidth, bottom + 3, 0xFF4CAF50);
         }
-        // Failure reports can be long; show two lines here and leave the full text in chat.
         int color = statusIsError ? 0xFFFF7070 : 0xFFB0B0B0;
         List<FormattedCharSequence> lines = font.split(status, width - 24);
         if (lines.size() > 2) {
@@ -415,16 +410,11 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
         TextureAtlasGenerator.LOGGER.error("Atlas generation failed", error);
     }
 
-    /** The exception message, or its type when it has none. */
     public static String describe(Throwable error) {
         String message = error.getMessage();
         return message == null || message.isBlank() ? error.getClass().getSimpleName() : message;
     }
 
-    /**
-     * Posts clickable links in chat: to each image (or, for more than one page, the first page and
-     * the folder) and to each mapping file.
-     */
     public static void announceSuccess(AtlasExporter.Result result) {
         List<Component> links = new ArrayList<>();
         if (result.images().size() == 1) {
@@ -444,7 +434,6 @@ public final class TextureAtlasScreen extends Screen implements AtlasExporter.Li
         Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(message);
     }
 
-    /** Posts the failure in chat, so it is visible even when the export was started by a command. */
     public static void announceFailure(Throwable error) {
         Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(
                 Component.literal("[Texture Atlas Generator] Export failed: " + describe(error))

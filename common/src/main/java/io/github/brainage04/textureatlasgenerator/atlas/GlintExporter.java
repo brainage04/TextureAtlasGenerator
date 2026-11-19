@@ -68,11 +68,6 @@ public final class GlintExporter {
         this.v1 = sprite.getV1();
     }
 
-    /**
-     * Starts the export on the render thread. Returns {@code false} if another export is running.
-     *
-     * @throws IllegalArgumentException if {@code pixelSize} is out of range
-     */
     public static boolean start(Minecraft client, int pixelSize, AtlasExporter.Listener listener) {
         if (pixelSize < AtlasExporter.MIN_PIXEL_SIZE || pixelSize > AtlasExporter.MAX_PIXEL_SIZE) {
             throw new IllegalArgumentException("Pixel size must be between "
@@ -174,14 +169,12 @@ public final class GlintExporter {
                 directory);
     }
 
-    /** Fills {@code argb} with the glint added to an item {@code millis} into the loop. */
     private void renderFrame(long millis, int[] argb) {
         long units = (long) (millis * GLINT_SPEED * 8.0);
         float offsetU = (float) (units % 110000L) / 110000.0F;
         float offsetV = (float) (units % 30000L) / 30000.0F;
         double cos = Math.cos(ROTATION);
         double sin = Math.sin(ROTATION);
-        // Below 16 px average several samples per pixel, as the atlas exporter supersamples items.
         int samples = Math.max(1, Math.ceilDiv(32, pixelSize));
         double[] sum = new double[3];
         float[] texel = new float[3];
@@ -215,7 +208,6 @@ public final class GlintExporter {
         }
     }
 
-    /** Bilinear, repeating texture lookup at normalised coordinates, as the GPU sampler does. */
     private void sample(double s, double t, float[] out) {
         double x = s * glintWidth - 0.5;
         double y = t * glintHeight - 0.5;

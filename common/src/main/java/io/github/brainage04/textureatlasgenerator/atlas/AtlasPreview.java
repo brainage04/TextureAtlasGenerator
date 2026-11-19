@@ -14,11 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The generator screen's preview: the visible cells drawn exactly as the export draws them — at
- * the chosen pixel size (up to the size they are shown at) — and shown scaled up without
- * smoothing.
- */
 public final class AtlasPreview implements AutoCloseable {
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(TextureAtlasGenerator.MOD_ID, "atlas_preview");
     private static final int MAX_TILE_SIZE = 4096;
@@ -29,9 +24,7 @@ public final class AtlasPreview implements AutoCloseable {
     private AtlasKind kind;
     private List<AtlasCatalog.Entry> entries = List.of();
     private int pixelSize = 1;
-    /** Changes whenever the drawn items change; renders of an older generation are dropped. */
     private int generation;
-    /** The stack drawn for each entry, or {@code null} before {@link #configure}. */
     private List<ItemStack> stacks;
     private PlayerHeadSkins skins;
     private String problem;
@@ -54,7 +47,6 @@ public final class AtlasPreview implements AutoCloseable {
         this.renderer = new AtlasItemRenderer(client);
     }
 
-    /** Sets what the preview draws. */
     public void configure(AtlasKind newKind, List<AtlasCatalog.Entry> newEntries, int newPixelSize) {
         boolean itemsChanged = newKind != kind || newEntries != entries;
         pixelSize = newPixelSize;
@@ -71,23 +63,15 @@ public final class AtlasPreview implements AutoCloseable {
         skins = kind.usesPlayerHeads() ? new PlayerHeadSkins(client, entries) : null;
     }
 
-    /**
-     * Requests the cells about to be drawn.
-     *
-     * @param indices catalog indexes of the visible entries
-     * @param displayPixels the size (in screen pixels) each cell is shown at
-     */
     public void show(int[] indices, int displayPixels) {
         wanted = indices;
         shownPixels = Math.max(1, displayPixels);
     }
 
-    /** Why the preview cannot be drawn, or {@code null}. */
     public String status() {
         return problem;
     }
 
-    /** Starts a render when the shown cells are not all up to date. Call on the render thread. */
     public void tick() {
         if (closed || rendering || failed || stacks == null || AtlasExporter.isExporting()) {
             return;
@@ -104,7 +88,6 @@ public final class AtlasPreview implements AutoCloseable {
         return Math.min(pixelSize, shownPixels);
     }
 
-    /** Draws cell {@code index} at ({@code x}, {@code y}); returns {@code false} if it is not rendered yet. */
     public boolean draw(GuiGraphicsExtractor graphics, int index, int x, int y, int size) {
         Integer slot = renderedGeneration == generation ? slots.get(index) : null;
         if (slot == null || texture == null) {
@@ -132,7 +115,6 @@ public final class AtlasPreview implements AutoCloseable {
         renderTile(indices, 0, tileColumns, renderSize, cellPixels, columns, pixels, requested);
     }
 
-    /** Renders the cells from {@code first}, a tile at a time, then uploads them all. */
     private void renderTile(int[] indices, int first, int tileColumns, int renderSize, int cellPixels, int columns, byte[] pixels, int requested) {
         if (closed || requested != generation) {
             rendering = false;
@@ -224,7 +206,6 @@ public final class AtlasPreview implements AutoCloseable {
         return cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage();
     }
 
-    /** Releases the texture. */
     @Override
     public void close() {
         closed = true;

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/** A canonical, length-limited prefix code in the WebP lossless form. */
 final class PrefixCode {
     private static final int[] CODE_LENGTH_ORDER = {17, 18, 0, 1, 2, 3, 4, 5, 16, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
@@ -21,7 +20,6 @@ final class PrefixCode {
         this.codes = canonicalCodes(lengths);
     }
 
-    /** Builds a code for {@code histogram} whose codes are at most {@code maxLength} bits. */
     static PrefixCode build(int[] histogram, int maxLength) {
         int used = 0;
         for (int count : histogram) {
@@ -51,12 +49,10 @@ final class PrefixCode {
         }
     }
 
-    /** Estimated cost in bits of {@code symbol}; used symbols only. */
     int length(int symbol) {
         return singleSymbol ? 0 : lengths[symbol];
     }
 
-    /** Serialises the code lengths as a simple or normal code length code. */
     void writeLengths(BitWriter out) throws IOException {
         int[] used = usedSymbols();
         if (used.length <= 2 && used[used.length - 1] < 256) {
@@ -178,7 +174,6 @@ final class PrefixCode {
         return codes;
     }
 
-    /** Length-limited Huffman code lengths by the package-merge (coin collector) algorithm. */
     private static void packageMerge(int[] histogram, int maxLength, int[] lengths) {
         int used = 0;
         for (int count : histogram) {
@@ -202,7 +197,6 @@ final class PrefixCode {
             }
         }
 
-        // Each node is a leaf (child == -1) or a package of two nodes of the previous level.
         List<long[]> levelWeights = new ArrayList<>();
         List<int[][]> levelChildren = new ArrayList<>();
         long[] weights = leafWeights.clone();

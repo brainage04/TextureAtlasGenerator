@@ -52,7 +52,6 @@ public final class PngStreamWriter implements AutoCloseable {
         writeChunk("IHDR", header, header.length);
     }
 
-    /** Appends {@code rows} RGBA scanlines, top to bottom, starting at {@code offset} in {@code rgba}. */
     public void writeRows(byte[] rgba, int offset, int rows) throws IOException {
         if (rowsWritten + rows > height) {
             throw new IllegalStateException("Too many PNG rows");
@@ -86,7 +85,6 @@ public final class PngStreamWriter implements AutoCloseable {
         }
     }
 
-    /** Releases the file handle without completing the image. */
     public void abort() {
         if (closed) {
             return;
@@ -100,7 +98,6 @@ public final class PngStreamWriter implements AutoCloseable {
         }
     }
 
-    /** Chooses the PNG filter with the smallest sum of absolute signed residuals, as libpng does. */
     private byte[] filterRow(byte[] rgba, int start) {
         byte[] prior = previousRow;
         long bestScore = Long.MAX_VALUE;

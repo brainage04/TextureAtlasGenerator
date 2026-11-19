@@ -14,7 +14,6 @@ final class BitWriter {
         this.out = out;
     }
 
-    /** Appends the low {@code count} bits of {@code value} (count at most 32). */
     void write(int value, int count) throws IOException {
         if (count == 0) {
             return;
@@ -29,7 +28,6 @@ final class BitWriter {
         }
     }
 
-    /** Pads the final byte with zero bits. */
     void flush() throws IOException {
         if (used > 0) {
             out.write((int) buffer & 0xFF);

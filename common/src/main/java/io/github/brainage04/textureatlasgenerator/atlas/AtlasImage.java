@@ -6,9 +6,7 @@ import io.github.brainage04.textureatlasgenerator.image.WebPWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 
-/** Receives an atlas image band by band and writes it in the chosen format. */
 abstract sealed class AtlasImage permits AtlasImage.Png, AtlasImage.WebP {
-    /** Output file format of an atlas image. */
     enum Format {
         WEBP("webp"),
         PNG("png");
@@ -24,12 +22,7 @@ abstract sealed class AtlasImage permits AtlasImage.Png, AtlasImage.WebP {
         }
     }
 
-    /**
-     * Lossless WebP when the heap can hold the image (WebP needs the whole image; PNG is streamed);
-     * otherwise PNG. Pages never exceed WebP's dimension limit.
-     *
-     * @return the format and, when PNG was forced, why
-     */
+    /** WebP needs the whole image in memory; PNG is streamed, so it is used when the heap cannot hold the image. */
     static Choice choose(int side) {
         if (side > WebPWriter.MAX_DIMENSION) {
             throw new IllegalArgumentException(side + " px exceeds WebP's " + WebPWriter.MAX_DIMENSION + " px limit");
@@ -50,13 +43,10 @@ abstract sealed class AtlasImage permits AtlasImage.Png, AtlasImage.WebP {
         return format == Format.WEBP ? new WebP(path, width, height) : new Png(path, width, height);
     }
 
-    /** Appends {@code rows} RGBA scanlines, top to bottom. */
     abstract void writeRows(byte[] rgba, int offset, int rows) throws IOException;
 
-    /** Completes and closes the file. */
     abstract void finish() throws IOException;
 
-    /** Closes the file without completing it. */
     abstract void abort();
 
     static final class Png extends AtlasImage {
