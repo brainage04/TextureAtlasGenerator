@@ -305,10 +305,9 @@ public final class GlintExporter {
                 "Draw over an icon with mix-blend-mode: plus-lighter, masked by the icon's alpha "
                         + "(see the .css file). Each pixel's colour times its alpha is what Minecraft adds to the icon.");
         JsonObject source = new JsonObject();
-        // The version the glint was cut from, not the running game's:
-        // SharedConstants.getCurrentVersion().name() is
-        // "Development Version" in a Loom dev run, where version.json is absent
-        // (DetectedVersion.java:20,46-50).
+        // The version the glint was cut from, not the running game's: this records the artifact's
+        // provenance, so it must not follow SharedConstants.getCurrentVersion(), which names whatever
+        // version the build happens to run against.
         source.addProperty("minecraft", "26.3");
         source.addProperty("texture", ItemFeatureRenderer.ENCHANTED_GLINT_ITEM.toString());
         source.addProperty("sprite", REFERENCE_SPRITE.toString());
