@@ -12,20 +12,51 @@ public final class AtlasCommands {
     private AtlasCommands() {}
 
     public static <S> LiteralArgumentBuilder<S> create() {
-        LiteralArgumentBuilder<S> atlas = LiteralArgumentBuilder.<S>literal("atlas")
-                .executes(context -> AtlasScreens.open(client(), null, 0))
-                .then(AtlasCommands.<S>pixels().executes(context -> AtlasScreens.open(
-                        client(), AtlasKind.VANILLA, IntegerArgumentType.getInteger(context, "pixels"))));
+        LiteralArgumentBuilder<S> atlas =
+                LiteralArgumentBuilder.<S>literal("atlas")
+                        .executes(context -> AtlasScreens.open(client(), null, 0))
+                        .then(
+                                AtlasCommands.<S>pixels()
+                                        .executes(
+                                                context ->
+                                                        AtlasScreens.open(
+                                                                client(),
+                                                                AtlasKind.VANILLA,
+                                                                IntegerArgumentType.getInteger(
+                                                                        context, "pixels"))));
         for (AtlasKind kind : AtlasKind.values()) {
-            atlas.then(LiteralArgumentBuilder.<S>literal(kind.commandName())
-                    .executes(context -> AtlasScreens.open(client(), kind, AtlasExporter.DEFAULT_PIXEL_SIZE))
-                    .then(AtlasCommands.<S>pixels().executes(context -> AtlasScreens.open(
-                            client(), kind, IntegerArgumentType.getInteger(context, "pixels")))));
+            atlas.then(
+                    LiteralArgumentBuilder.<S>literal(kind.commandName())
+                            .executes(
+                                    context ->
+                                            AtlasScreens.open(
+                                                    client(),
+                                                    kind,
+                                                    AtlasExporter.DEFAULT_PIXEL_SIZE))
+                            .then(
+                                    AtlasCommands.<S>pixels()
+                                            .executes(
+                                                    context ->
+                                                            AtlasScreens.open(
+                                                                    client(),
+                                                                    kind,
+                                                                    IntegerArgumentType.getInteger(
+                                                                            context, "pixels")))));
         }
-        atlas.then(LiteralArgumentBuilder.<S>literal("glint")
-                .executes(context -> AtlasScreens.openGlint(client(), GlintExporter.DEFAULT_PIXEL_SIZE))
-                .then(AtlasCommands.<S>pixels().executes(context -> AtlasScreens.openGlint(
-                        client(), IntegerArgumentType.getInteger(context, "pixels")))));
+        atlas.then(
+                LiteralArgumentBuilder.<S>literal("glint")
+                        .executes(
+                                context ->
+                                        AtlasScreens.openGlint(
+                                                client(), GlintExporter.DEFAULT_PIXEL_SIZE))
+                        .then(
+                                AtlasCommands.<S>pixels()
+                                        .executes(
+                                                context ->
+                                                        AtlasScreens.openGlint(
+                                                                client(),
+                                                                IntegerArgumentType.getInteger(
+                                                                        context, "pixels")))));
         return atlas;
     }
 
@@ -35,6 +66,8 @@ public final class AtlasCommands {
 
     private static <S> RequiredArgumentBuilder<S, Integer> pixels() {
         return RequiredArgumentBuilder.argument(
-                "pixels", IntegerArgumentType.integer(AtlasExporter.MIN_PIXEL_SIZE, AtlasExporter.MAX_PIXEL_SIZE));
+                "pixels",
+                IntegerArgumentType.integer(
+                        AtlasExporter.MIN_PIXEL_SIZE, AtlasExporter.MAX_PIXEL_SIZE));
     }
 }

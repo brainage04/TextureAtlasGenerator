@@ -8,7 +8,8 @@ public final class ClientModCommands {
     private ClientModCommands() {}
 
     public static void initialize() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-                dispatcher.register(AtlasCommands.<FabricClientCommandSource>create()));
+        ClientCommandRegistrationCallback.EVENT.register(
+                (dispatcher, registryAccess) ->
+                        dispatcher.register(AtlasCommands.<FabricClientCommandSource>create()));
     }
 }

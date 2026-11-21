@@ -19,7 +19,12 @@ public final class WebPWriter {
 
     /** {@code argb} is overwritten. */
     public static void writeStill(Path path, int[] argb, int width, int height) throws IOException {
-        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
+        try (FileChannel channel =
+                FileChannel.open(
+                        path,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE)) {
             OutputStream out = new BufferedOutputStream(Channels.newOutputStream(channel), 1 << 16);
             out.write(ascii("RIFF"));
             out.write(new byte[4]);
@@ -53,11 +58,17 @@ public final class WebPWriter {
 
         public Animation(Path path, int width, int height, int loopCount) throws IOException {
             if (width < 1 || height < 1 || width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                throw new IllegalArgumentException("WebP images are limited to " + MAX_DIMENSION + " px per side");
+                throw new IllegalArgumentException(
+                        "WebP images are limited to " + MAX_DIMENSION + " px per side");
             }
             this.width = width;
             this.height = height;
-            channel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+            channel =
+                    FileChannel.open(
+                            path,
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING,
+                            StandardOpenOption.WRITE);
             out = new BufferedOutputStream(Channels.newOutputStream(channel), 1 << 16);
             out.write(ascii("RIFF"));
             out.write(new byte[4]);
